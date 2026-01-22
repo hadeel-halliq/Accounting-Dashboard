@@ -33,7 +33,7 @@ export default function NavBar({ setIsSideOpen }) {
             </InputGroupAddon>
           </InputGroup>
         </div>
-        <Button onClick={() => setIsSideOpen(prev => !prev)}>
+        <Button onClick={() => setIsSideOpen((prev) => !prev)}>
           <Menu />
         </Button>
       </div>

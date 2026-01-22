@@ -1,5 +1,5 @@
 import { useState } from "react";
-import NavBar from "./NavBar/NavBar";
+import NavBar from "../components/navigation/NavBar/NavBar";
 
 export default function DashboardLayout({ children }) {
   const [isSideOpen, setIsSideOpen] = useState(false);
