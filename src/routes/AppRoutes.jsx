@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import Login from "@/pages/Login/Login";
+import Login from "@/pages/auth/Login";
 import DashBoard from "@/pages/dashboard/DashBoard";
 import Products from "@/pages/Products/Products";
 import Invoices from "@/pages/Invoices/Invoices";
