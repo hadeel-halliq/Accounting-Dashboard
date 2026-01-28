@@ -1,7 +1,5 @@
-import DashboardLayout from "./layout/DashboardLayout";
-
 function App() {
-  return <DashboardLayout />;
+  return;
 }
 
 export default App;
