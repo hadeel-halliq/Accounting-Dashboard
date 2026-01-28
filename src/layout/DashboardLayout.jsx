@@ -1,25 +1,22 @@
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { Outlet } from "react-router-dom";
 import NavBar from "../components/navigation/NavBar/NavBar";
+import Sidebar from "@/components/navigation/SideBar/SideBar";
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout() {
   const [isSideOpen, setIsSideOpen] = useState(false);
+  const { user } = useAuth();
   return (
     <div className="flex min-h-screen  transition-colors duration-300">
       <main className="flex-1 p-6">
-        <NavBar setIsSideOpen={setIsSideOpen} />
-        <div className="mt-6">{children}</div>
+        <NavBar user={user} setIsSideOpen={setIsSideOpen} />
+        <div className="mt-6">
+          <Outlet />
+        </div>
       </main>
-      <aside
-        className={`
-          w-64 border-l p-4 bg-sidebar text-sidebar-foreground
-          transition-transform duration-300 ease-in-out
-          fixed lg:static top-0 right-0 min-h-screen z-50
-          ${isSideOpen ? "translate-x-0" : "translate-x-full"}
-          lg:translate-x-0
-        `}
-      >
-        Sidebar
-      </aside>
+
+      <Sidebar isSideOpen={isSideOpen} />
       {isSideOpen && (
         <div
           className="fixed bg-sidebar z-40 lg:hidden"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import { Button } from "../../ui/Button";
 import {
@@ -13,8 +13,8 @@ import { Menu } from "lucide-react";
 
 import AvatarMenu from "./AvatarMenu";
 
-export default function NavBar({ setIsSideOpen }) {
-  const [darkMode, setDarkMode] = useState(false);
+export default function NavBar({ setIsSideOpen, user }) {
+  const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -23,19 +23,22 @@ export default function NavBar({ setIsSideOpen }) {
   }, [darkMode]);
 
   return (
-    <div className="flex justify-between">
+    <div className="flex flex-col-reverse gap-4 sm:flex sm:flex-row sm:justify-between">
       <div className="flex items-center gap-3">
-        <div className="grid w-full max-w-sm gap-6">
-          <InputGroup>
-            <InputGroupInput placeholder="Search..." />
-            <InputGroupAddon>
-              <SearchIcon />
-            </InputGroupAddon>
-          </InputGroup>
+        <div className="flex flex-row-reverse gap-4">
+          <div className="grid w-full max-w-sm gap-6">
+            <InputGroup >
+              <InputGroupInput placeholder="Search..." />
+              <InputGroupAddon>
+                <SearchIcon />
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <Button onClick={() => setIsSideOpen((prev) => !prev)}>
+            <Menu />
+          </Button>
+
         </div>
-        <Button onClick={() => setIsSideOpen((prev) => !prev)}>
-          <Menu />
-        </Button>
       </div>
       <div className="flex items-center justify-between">
         <Button
@@ -44,7 +47,7 @@ export default function NavBar({ setIsSideOpen }) {
         >
           {darkMode ? <Moon /> : <Sun />}
         </Button>
-        <AvatarMenu />
+        <AvatarMenu user={user} />
       </div>
     </div>
   );

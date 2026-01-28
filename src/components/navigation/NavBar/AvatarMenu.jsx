@@ -10,20 +10,30 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, User, Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
-export default function AvatarMenu() {
+export default function AvatarMenu({ user }) {
+  const { logout } = useAuth();
+
+  const initials = user?.name
+    ?.split(" ")
+    .map(n => n[0])
+    .join("");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant="navbar"
           className="flex items-center gap-2 px-2"
         >
           <Avatar className="h-12 w-12">
-            <AvatarImage src={mohamad} alt="Admin mohamad"/>
+           <AvatarImage src={user?.avatar} />
+            <AvatarFallback>
+              {initials || "U"}
+            </AvatarFallback>
           </Avatar>
 
-          <span className="text-sm font-medium">Mohamad</span>
+          <span className="text-sm font-medium"> {user?.name}</span>
 
           <ChevronDown className="h-4 w-4 opacity-70" />
         </Button>
