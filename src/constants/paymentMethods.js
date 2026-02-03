@@ -1,13 +1,13 @@
+// القيم كما تأتي من السيرفر
 export const paymentMethods = {
-  CASH: "CASH",
-  CARD: "CARD",
-  BANK_TRANSFER: "BANK_TRANSFER",
-  CREDIT: "CREDIT"
+  CASH: "cash",
+  BANK: "bank",
+  CHEQUE: "cheque"
 };
 
+// الترجمة للعرض فقط
 export const paymentMethodsLabels = {
-  CASH: "نقداً",
-  CARD: "بطاقة",
-  BANK_TRANSFER: "تحويل بنكي",
-  CREDIT: "ائتمان"
+  cash: "نقداً",
+  bank: "تحويل بنكي",
+  cheque: "شيك"
 };

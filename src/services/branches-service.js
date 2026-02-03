@@ -1,6 +1,15 @@
 import api from "./api";
 
-export const getBranches = () => api.get("/branches");
-export const createBranche = (data) => api.post("/branches", data);
-export const updateBranche = (id,data) => api.post(`/branches/${id}`, data);
-export const toggleBranchStatus = (id) => api.patch(`/branches/${id}/toggle`);
+// جلب كل الفروع
+export const getBranches = (page = 1, limit = 10) =>
+  api.get(`/branches?page=${page}&limit=${limit}`);
+
+// إنشاء فرع جديد
+export const createBranch = (data) => api.post("/branches", data);
+
+// تعديل فرع موجود
+export const updateBranch = (id, data) => api.put(`/branches/${id}`, data);
+
+// تبديل حالة الفرع (active / inactive)
+export const toggleBranchStatus = (id) =>
+  api.patch(`/branches/${id}/toggle-status`);

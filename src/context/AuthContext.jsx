@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { login as loginRequest } from "@/services/auth-service";
+import { roles } from "@/constants/roles";
 
 const AuthContext = createContext(null);
 
@@ -16,9 +17,22 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(credentials) {
-    const data = await loginRequest(credentials);
-    setUser(data);
-    localStorage.setItem("auth", JSON.stringify(data));
+    try {
+      const data = await loginRequest(credentials);
+
+      const normalizedUser = {
+        ...data,
+        role: data.role?.toUpperCase(),
+        branch_id: data.branch_id || data.branchId || null,
+      };
+
+      setUser(normalizedUser);
+      localStorage.setItem("auth", JSON.stringify(normalizedUser));
+      return normalizedUser; 
+    } catch (err) {
+      console.error("Login failed:", err);
+      throw err;
+    }
   }
 
   function logout() {
@@ -46,4 +60,3 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-

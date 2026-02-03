@@ -1,16 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL : "our url"
-})
-
-api.interceptors.request.use(config => {
-    const auth = localStorage.getItem("auth");
-    if (auth) {
-        const { token } = JSON.parse(auth);
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config;
+    baseURL : "https://mini-erp-system-eight.vercel.app/api/v1",
+    withCredentials: true
 })
 
 export default api
