@@ -1,13 +1,15 @@
 export const invoiceStatus = {
-  PENDING: "PENDING",
+  DRAFT: "DRAFT",
   CONFIRMED: "CONFIRMED",
-  CANCELED: "CANCELED",
-  COMPLETED: "COMPLETED"
+  PAID: "PAID",
+  UNPAID: "UNPAID",
+  CANCELLED: "CANCELLED",
 };
 
 export const invoiceStatusLabels = {
-  PENDING: "قيد الانتظار",
-  CONFIRMED: "تم التأكيد",
-  CANCELED: "ملغاة",
-  COMPLETED: "مكتملة"
+  DRAFT: "مسودة",
+  CONFIRMED: "مؤكدة",
+  PAID: "مدفوعة",
+  UNPAID: "غير مدفوعة",
+  CANCELLED: "ملغاة",
 };

@@ -8,34 +8,38 @@ import Categories from "@/pages/Categories/Categories";
 import Branches from "@/pages/Branches/Branches ";
 
 import ProtectedRoute from "./ProtectedRoute";
-import RoleRoute from "./RoleRoute";
+import PermissionRoute from "./PermissionRoute";
 import DashboardLayout from "@/layout/DashboardLayout";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<DashBoard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/invoices" element={<Invoices />} />
+
           <Route
             path="/categories"
             element={
-              <RoleRoute roles={["super_admin"]}>
+              <PermissionRoute resource="categories" action="can_view">
                 <Categories />
-              </RoleRoute>
+              </PermissionRoute>
             }
           />
+
           <Route
             path="/branches"
             element={
-              <RoleRoute roles={["super_admin"]}>
+              <PermissionRoute resource="branches" action="can_view">
                 <Branches />
-              </RoleRoute>
+              </PermissionRoute>
             }
           />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Route>

@@ -1,11 +1,11 @@
 export const invoiceTypes = {
-  SALES: "SALES",
+  SALE: "SALE",
   PURCHASE: "PURCHASE",
-  RETURN: "RETURN"
+  EXPENSE: "EXPENSE",
 };
 
 export const invoiceTypesLabels = {
-  SALES: "مبيعات",
+  SALE: "مبيعات",
   PURCHASE: "مشتريات",
-  RETURN: "مرتجعات"
+  EXPENSE: "مصروف",
 };

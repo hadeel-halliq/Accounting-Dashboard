@@ -1,26 +1,19 @@
 import api from "./api";
 
-// تسجيل الدخول
-export const login = async (credentials) => {
-  const response = await api.post("/auth/login", credentials);
-  return response.data.data;
-};
+export const login = (data) =>
+  api.post("/auth/login", data);
 
-// تسجيل الخروج
-export const logout = async () => {
-  await api.post("/auth/logout");
-};
+export const logout = () =>
+ api.post("/auth/logout", {});
 
-// الحصول على بيانات المستخدم الحالي
-export const getCurrentUser = async () => {
-  const response = await api.get("/auth/me");
-  return response.data.data;
+export const getMe = async () => {
+  const res = await api.get("/auth/me");
+  return res.data.data;
 };
-
 
 // ----------------------------------------------------------------
 
-// // وهمي للتحقق من الروتس
+// وهمي للتحقق من الروتس
 
 // export async function login(credentials) {
 //   const { email, password } = credentials;

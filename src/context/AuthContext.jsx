@@ -1,6 +1,9 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import { login as loginRequest } from "@/services/auth-service";
-import { roles } from "@/constants/roles";
+import {
+  login as loginRequest,
+  logout as logoutRequest,
+  getMe,
+} from "@/services/auth-service";
 
 const AuthContext = createContext(null);
 
@@ -8,44 +11,61 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Check auth on app load (cookie-based)
   useEffect(() => {
-    const savedAuth = localStorage.getItem("auth");
-    if (savedAuth) {
-      setUser(JSON.parse(savedAuth));
+    async function checkAuth() {
+      try {
+        const me = await getMe();
+
+        const normalizedUser = {
+          ...me,
+          role: me.role?.toUpperCase(),
+          branchId: me.branch_id ?? me.branchId ?? null,
+        };
+
+        setUser(normalizedUser);
+      } catch (err) {
+        // cookie invalid / expired
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     }
-    setLoading(false);
+
+    checkAuth();
   }, []);
 
+  // Login
   async function login(credentials) {
-    try {
-      const data = await loginRequest(credentials);
+    await loginRequest(credentials); // sets HttpOnly cookie
 
-      const normalizedUser = {
-        ...data,
-        role: data.role?.toUpperCase(),
-        branch_id: data.branch_id || data.branchId || null,
-      };
+    const me = await getMe();
 
-      setUser(normalizedUser);
-      localStorage.setItem("auth", JSON.stringify(normalizedUser));
-      return normalizedUser; 
-    } catch (err) {
-      console.error("Login failed:", err);
-      throw err;
-    }
+    const normalizedUser = {
+      ...me,
+      role: me.role?.toUpperCase(),
+      branchId: me.branch_id ?? me.branchId ?? null,
+    };
+
+    setUser(normalizedUser);
+    return normalizedUser;
   }
 
-  function logout() {
-    setUser(null);
-    localStorage.removeItem("auth");
+  // Logout
+  async function logout() {
+    try {
+      await logoutRequest();
+    } finally {
+      setUser(null);
+    }
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        role: user && user.role,
-        branchId: user && user.branch_id,
+        role: user?.role ?? null,
+        branchId: user?.branchId ?? null,
         isAuthenticated: Boolean(user),
         login,
         logout,
@@ -58,5 +78,9 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return context;
 }

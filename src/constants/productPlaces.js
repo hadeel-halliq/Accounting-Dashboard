@@ -1,11 +1,9 @@
 export const productPlaces = {
-  MAIN_WAREHOUSE: "MAIN_WAREHOUSE",
-  BRANCH: "BRANCH",
-  SHELF: "SHELF"
+  WAREHOUSE: "WAREHOUSE",
+  STORE: "STORE",
 };
 
 export const productPlacesLabels = {
-  MAIN_WAREHOUSE: "المخزن الرئيسي",
-  BRANCH: "الفرع",
-  SHELF: "الرف"
+  WAREHOUSE: "المستودع",
+  STORE: "المعرض",
 };
