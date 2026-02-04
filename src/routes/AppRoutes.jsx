@@ -10,11 +10,14 @@ import Branches from "@/pages/Branches/Branches ";
 import ProtectedRoute from "./ProtectedRoute";
 import PermissionRoute from "./PermissionRoute";
 import DashboardLayout from "@/layout/DashboardLayout";
+import Register from "@/pages/auth/Register";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+
+      <Route path="/register" element={<Register />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>

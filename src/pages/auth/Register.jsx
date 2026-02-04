@@ -1,16 +1,9 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { LoginSchema } from "./login-schema";
-
-import { Sun, Moon } from "lucide-react";
-import { Eye, EyeOff } from "lucide-react";
-
-import { Button } from "../../components/ui/Button";
+import { RegisterSchema } from "./Register-schema";
+import { Button } from "@/components/ui/Button";
 import {
   Form,
   FormField,
@@ -19,20 +12,21 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
+import { Sun, Moon } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { register } from "@/services/auth-service";
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm({
-    resolver: zodResolver(LoginSchema),
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
+      fullname: "",
       email: "",
       password: "",
     },
@@ -46,12 +40,19 @@ export default function Login() {
 
   async function onSubmit(values) {
     try {
-      await login(values);
-      navigate("/", { replace: true });
+      await register(values);
+
+      navigate("/login");
     } catch (err) {
-      setError("root", {
-        message: "بريد إلكتروني أو كلمة مرور غير صحيحة",
-      });
+      if (err.response?.status === 409) {
+        setError("email", {
+          message: "هذا البريد مستخدم مسبقًا",
+        });
+      } else {
+        setError("root", {
+          message: "حدث خطأ أثناء إنشاء الحساب",
+        });
+      }
     }
   }
 
@@ -71,12 +72,14 @@ export default function Login() {
       >
         {darkMode ? <Sun /> : <Moon />}
       </Button>
+
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-center text-2xl">تسجيل الدخول</CardTitle>
+            <CardTitle className="text-center text-2xl">
+              إنشاء حساب جديد
+            </CardTitle>
           </CardHeader>
-
           <CardContent>
             <Form {...form}>
               <form
@@ -84,13 +87,28 @@ export default function Login() {
                 className="space-y-4"
                 dir="rtl"
               >
+                {/* Fullname */}
+                <FormField
+                  control={form.control}
+                  name="fullname"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الاسم الكامل:</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {/* Email */}
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الإيميل : </FormLabel>
+                      <FormLabel>البريد الإلكتروني:</FormLabel>
                       <FormControl>
                         <Input type="email" {...field} />
                       </FormControl>
@@ -99,22 +117,20 @@ export default function Login() {
                   )}
                 />
 
+                {/* Password */}
                 <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>كلمة المرور :</FormLabel>
-
+                      <FormLabel>كلمة المرور:</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
-                            dir="rtl"
-                            className="pr-10 text-right"
+                            className="pr-10"
                           />
-
                           <button
                             type="button"
                             onClick={() => setShowPassword((prev) => !prev)}
@@ -128,7 +144,6 @@ export default function Login() {
                           </button>
                         </div>
                       </FormControl>
-
                       <FormMessage />
                     </FormItem>
                   )}
@@ -142,21 +157,16 @@ export default function Login() {
                 )}
 
                 <Button className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "تسجيل الدخول . . ." : "تسجيل الدخول"}
+                  {isSubmitting ? "جاري التسجيل..." : "إنشاء الحساب"}
                 </Button>
 
-                {/* رابط إنشاء حساب */}
-                <div className="text-center text-sm my-2">
-                  <p className="mb-4">مستخدم جديد؟</p>
-
-                  <Button
-                    type="button" // 🔥 مهم
-                    className="w-full"
-                    onClick={() => navigate("/register")}
-                  >
-                    إنشاء حساب
-                  </Button>
-                </div>
+                {/* رابط للـ login */}
+                <p className="text-center text-sm mt-2">
+                  لديك حساب بالفعل ؟
+                  <Link to="/login" className="text-primary hover:underline">
+                    تسجيل الدخول
+                  </Link>
+                </p>
               </form>
             </Form>
           </CardContent>
