@@ -1,14 +1,12 @@
 export const sidebarLinks = {
   super_admin: [
-    { name: "Dashboard", path: "/" },
-    { name: "Products", path: "/products" },
-    { name: "Invoices", path: "/invoices" },
-    { name: "Categories", path: "/categories" },
+    { name: "Dashboard", path: "/dashboard" },
     { name: "Branches", path: "/branches" },
+    { name: "Owners", path: "/owners" },
+    { name: "Users", path: "/users" },
+    { name: "Plans", path: "/plans" },
+    { name: "Logs", path: "/logs" },
+    { name: "Profile", path: "/profile" },
   ],
-  admin: [
-    { name: "Dashboard", path: "/" },
-    { name: "Products", path: "/products" },
-    { name: "Invoices", path: "/invoices" },
-  ],
+  admin: [],
 };

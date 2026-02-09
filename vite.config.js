@@ -11,13 +11,13 @@ export default defineConfig({
     },
   },
 
-  server: {
-    proxy: {
-      "/api": {
-        target: "https://mini-erp-system-eight.vercel.app",
-        changeOrigin: true,
-        secure: true,
-      },
-    },
-  },
+  // server: {
+  //   proxy: {
+  //     "/api": {
+  //       target: "https://mini-erp-system-eight.vercel.app",
+  //       changeOrigin: true,
+  //       secure: true,
+  //     },
+  //   },
+  // },
 });

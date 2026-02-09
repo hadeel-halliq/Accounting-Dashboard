@@ -1,86 +1,50 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import {
-  login as loginRequest,
-  logout as logoutRequest,
-  getMe,
-} from "@/services/auth-service";
+import { createContext, useEffect, useState } from "react";
+import AuthService from "@/services/auth.service";
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check auth on app load (cookie-based)
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const me = await getMe();
-
-        const normalizedUser = {
-          ...me,
-          role: me.role?.toUpperCase(),
-          branchId: me.branch_id ?? me.branchId ?? null,
-        };
-
-        setUser(normalizedUser);
-      } catch (err) {
-        // cookie invalid / expired
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+  const fetchMe = async () => {
+    try {
+      const data = await AuthService.me();
+      setUser(data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    checkAuth();
+  useEffect(() => {
+    fetchMe();
   }, []);
 
-  // Login
-  async function login(credentials) {
-    await loginRequest(credentials); // sets HttpOnly cookie
+  const login = async (credentials) => {
+    await AuthService.login(credentials); // يحط الكوكي فقط
 
-    const me = await getMe();
+    const me = await AuthService.me(); //  جيب بيانات المستخدم
+    setUser(me); //  خزّنها في state
+  };
 
-    const normalizedUser = {
-      ...me,
-      role: me.role?.toUpperCase(),
-      branchId: me.branch_id ?? me.branchId ?? null,
-    };
-
-    setUser(normalizedUser);
-    return normalizedUser;
-  }
-
-  // Logout
-  async function logout() {
-    try {
-      await logoutRequest();
-    } finally {
-      setUser(null);
-    }
-  }
+  const logout = async () => {
+    await AuthService.logout();
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        role: user?.role ?? null,
-        branchId: user?.branchId ?? null,
-        isAuthenticated: Boolean(user),
+        loading,
+        isAuthenticated: !!user,
         login,
         logout,
-        loading,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return context;
-}
+};
