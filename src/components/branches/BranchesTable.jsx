@@ -1,54 +1,73 @@
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-export default function BranchesTable({ data, onEdit, onDelete }) {
+export default function BranchesTable({ data = [], onEdit, onDelete }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="hidden md:block rounded-xl border bg-card overflow-x-auto">
+    <div className="rounded-xl border bg-card overflow-x-auto">
 
-      <Table dir="rtl">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-right">اسم الفرع</TableHead>
-            <TableHead className="text-right">العنوان</TableHead>
-            <TableHead className="text-right">الهاتف</TableHead>
-            <TableHead className="text-right">الحالة</TableHead>
-            <TableHead className="text-left">إجراءات</TableHead>
-          </TableRow>
-        </TableHeader>
+      <table className="w-full text-sm" dir="rtl">
 
-        <TableBody>
+        {/* Header */}
+        <thead className="border-b bg-muted/40">
+          <tr>
+            <th className="text-right p-3">اسم الفرع</th>
+            <th className="text-right p-3">العنوان</th>
+            <th className="text-right p-3">الهاتف</th>
+            <th className="text-right p-3">الحالة</th>
+            <th className="text-center p-3 w-[220px] ">الإجراءات</th>
+          </tr>
+        </thead>
+
+        {/* Body */}
+        <tbody>
           {data.map((b) => (
-            <TableRow key={b.branchid}>
-              <TableCell className="text-right font-medium">
-                {b.branchname}
-              </TableCell>
+            <tr key={b.branchid} className="border-b hover:bg-muted/40">
 
-              <TableCell className="text-right">{b.address}</TableCell>
-              <TableCell className="text-right">{b.phone}</TableCell>
-              <TableCell className="text-right">
+              <td className="p-3">{b.branchname}</td>
+              <td className="p-3">{b.address}</td>
+              <td className="p-3">{b.phone}</td>
+
+              <td className="p-3">
                 {b.isactive ? "مفعل" : "غير مفعل"}
-              </TableCell>
+              </td>
 
-              <TableCell className="text-left space-x-2">
-                <Button size="sm" variant="outline" onClick={() => onEdit(b)}>
-                  تعديل
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => onDelete(b)}>
-                  حذف
-                </Button>
-              </TableCell>
-            </TableRow>
+              <td className="p-3">
+                <div className="flex justify-end gap-2">
+
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => navigate(`/branches/${b.branchid}`)}
+                  >
+                    عرض
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onEdit(b)}
+                  >
+                    تعديل
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => onDelete(b)}
+                  >
+                    حذف
+                  </Button>
+
+                </div>
+              </td>
+
+            </tr>
           ))}
-        </TableBody>
-      </Table>
+        </tbody>
 
+      </table>
     </div>
   );
 }

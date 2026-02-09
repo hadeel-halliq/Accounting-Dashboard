@@ -1,44 +1,64 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
-export default function BranchesCards({ data, onEdit, onDelete }) {
+export default function BranchesCards({ data = [], onEdit, onDelete }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="grid gap-4 md:hidden">
+    <div className="grid gap-4">
+
       {data.map((b) => (
-        <Card key={b.branchid}>
-          <CardContent className="p-4 space-y-2 text-right">
+        <div
+          key={b.branchid}
+          className="rounded-xl border bg-card p-4 space-y-3 shadow-sm"
+        >
 
-            <div>
-              <p className="text-xs text-muted-foreground">اسم الفرع</p>
-              <p className="font-medium">{b.branchname}</p>
-            </div>
+          <div>
+            <p className="font-semibold text-lg">
+              {b.branchname}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {b.address}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {b.phone}
+            </p>
+          </div>
 
-            <div>
-              <p className="text-xs text-muted-foreground">العنوان</p>
-              <p>{b.address}</p>
-            </div>
+          <p className="text-sm">
+            {b.isactive ? "مفعل" : "غير مفعل"}
+          </p>
 
-            <div>
-              <p className="text-xs text-muted-foreground">رقم الهاتف</p>
-              <p>{b.phone}</p>
-            </div>
+          {/* أزرار */}
+          <div className="flex flex-wrap gap-2">
 
-            <div>
-              <p className="text-xs text-muted-foreground">الحالة</p>
-              <p>{b.isactive ? "مفعل" : "غير مفعل"}</p>
-            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => navigate(`/branches/${b.branchid}`)}
+            >
+              عرض
+            </Button>
 
-            <div className="flex justify-start gap-2 pt-2">
-              <Button size="sm" variant="outline" onClick={() => onEdit(b)}>
-                تعديل
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => onDelete(b)}>
-                حذف
-              </Button>
-            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onEdit(b)}
+            >
+              تعديل
+            </Button>
 
-          </CardContent>
-        </Card>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onDelete(b)}
+            >
+              حذف
+            </Button>
+
+          </div>
+
+        </div>
       ))}
     </div>
   );

@@ -24,7 +24,7 @@ export default function BranchesPage() {
   const [selected, setSelected] = useState(null);
 
   /* ==============================
-     Fetch branches
+     Fetch
   ============================== */
 
   const fetchBranches = async () => {
@@ -32,6 +32,8 @@ export default function BranchesPage() {
       setLoading(true);
       const data = await BranchesService.list();
       setBranches(data || []);
+    } catch (err) {
+      console.error("Failed loading branches", err);
     } finally {
       setLoading(false);
     }
@@ -73,7 +75,10 @@ export default function BranchesPage() {
 
   const handleDelete = async () => {
     await BranchesService.remove(selected.branchid);
+
     setOpenDelete(false);
+    setSelected(null);
+
     fetchBranches();
   };
 
@@ -84,7 +89,7 @@ export default function BranchesPage() {
   return (
     <div dir="rtl" className="space-y-6">
 
-      {/* Header */}
+      {/* ================= Header ================= */}
       <div className="flex items-center justify-between flex-wrap gap-3">
 
         <h1 className="text-2xl font-bold">
@@ -97,40 +102,45 @@ export default function BranchesPage() {
         </Button>
       </div>
 
-      {/* Loading */}
+      {/* ================= Loading ================= */}
       {loading && (
-        <p className="text-muted-foreground text-center py-10">
-          جاري التحميل...
-        </p>
+        <div className="text-center py-16 text-muted-foreground">
+          جاري تحميل الفروع...
+        </div>
       )}
 
-      {/* Empty state */}
+      {/* ================= Empty ================= */}
       {!loading && branches.length === 0 && (
-        <p className="text-muted-foreground text-center py-10">
-          لا يوجد فروع بعد
-        </p>
+        <div className="text-center py-16 text-muted-foreground">
+          لا يوجد فروع حالياً
+        </div>
       )}
 
-      {/* Content */}
+      {/* ================= Content ================= */}
       {!loading && branches.length > 0 && (
         <>
-          {/* 📱 Mobile Cards */}
-          <BranchesCards
-            data={branches}
-            onEdit={openEdit}
-            onDelete={openDeleteDialog}
-          />
+          {/* 📱 Mobile → Cards */}
+          <div className="md:hidden">
+            <BranchesCards
+              data={branches}
+              onEdit={openEdit}
+              onDelete={openDeleteDialog}
+            />
+          </div>
 
-          {/* 💻 Desktop Table */}
-          <BranchesTable
-            data={branches}
-            onEdit={openEdit}
-            onDelete={openDeleteDialog}
-          />
+          {/* 💻 Desktop → Table */}
+          <div className="hidden md:block">
+            <BranchesTable
+              data={branches}
+              onEdit={openEdit}
+              onDelete={openDeleteDialog}
+            />
+          </div>
         </>
       )}
 
-      {/* Dialogs */}
+      {/* ================= Dialogs ================= */}
+
       <BranchFormDialog
         open={openForm}
         onClose={() => setOpenForm(false)}

@@ -1,68 +1,96 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+
+import BranchesService from "@/services/branches.service";
+
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default function BranchesTable({ data, onEdit, onDelete }) {
+export default function BranchDetailsPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
 
+  const [branch, setBranch] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  /* ==============================
+     Fetch branch
+  ============================== */
+
+  useEffect(() => {
+    const fetchBranch = async () => {
+      try {
+        const data = await BranchesService.get(id);
+        setBranch(data); // object فقط
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBranch();
+  }, [id]);
+
+  /* ==============================
+     UI
+  ============================== */
+
+  if (loading) {
+    return (
+      <div className="text-center py-16 text-muted-foreground">
+        جاري تحميل بيانات الفرع...
+      </div>
+    );
+  }
+
+  if (!branch) {
+    return (
+      <div className="text-center py-16 text-destructive">
+        الفرع غير موجود
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-xl border bg-card overflow-x-auto">
+    <div dir="rtl" className="space-y-6 max-w-3xl mx-auto">
 
-      <table className="w-full text-sm" dir="rtl">
-        <thead className="border-b">
-          <tr>
-            <th className="text-right p-3">اسم الفرع</th>
-            <th className="text-right p-3">العنوان</th>
-            <th className="text-right p-3">الهاتف</th>
-            <th className="text-right p-3">الحالة</th>
-            <th className="text-left p-3">الإجراءات</th>
-          </tr>
-        </thead>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">تفاصيل الفرع</h1>
 
-        <tbody>
-          {data.map((b) => (
-            <tr key={b.branchid} className="border-b">
+        <Button variant="outline" onClick={() => navigate("/branches")}>
+          رجوع
+        </Button>
+      </div>
 
-              <td className="p-3">{b.branchname}</td>
-              <td className="p-3">{b.address}</td>
-              <td className="p-3">{b.phone}</td>
-              <td className="p-3">
-                {b.isactive ? "مفعل" : "غير مفعل"}
-              </td>
+      {/* Card */}
+      <Card>
+        <CardContent className="grid gap-4 p-6 text-sm">
 
-              <td className="p-3">
-                <div className="flex gap-2">
+          <Row label="اسم الفرع" value={branch.branchname} />
+          <Row label="العنوان" value={branch.address} />
+          <Row label="الهاتف" value={branch.phone} />
+          <Row label="الحالة" value={branch.isactive ? "مفعل" : "غير مفعل"} />
+          <Row
+            label="تاريخ البدء"
+            value={new Date(branch.startdate).toLocaleDateString()}
+          />
+          <Row label="ملاحظات الخطة" value={branch.plannotes || "—"} />
 
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/branches/${b.branchid}`)}
-                  >
-                    عرض
-                  </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onEdit(b)}
-                  >
-                    تعديل
-                  </Button>
+/* ==============================
+   Row Component
+============================== */
 
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => onDelete(b)}
-                  >
-                    حذف
-                  </Button>
-
-                </div>
-              </td>
-
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
+function Row({ label, value }) {
+  return (
+    <div className="flex justify-between border-b pb-2">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium">{value}</span>
     </div>
   );
 }
