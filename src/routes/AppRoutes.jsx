@@ -17,8 +17,9 @@ import InvoicesPage from "../pages/invoices/InvoicesPage";
 import PaymentsPage from "../pages/payments/PaymentsPage";
 import ReturnsPage from "../pages/returns/ReturnsPage";
 import LogsPage from "../pages/logs/LogsPage";
-import BranchesPage from "../pages/branches/BranchesPage";
+import BranchesPage from "../pages/super-admin/BranchesPage";
 import SubscriptionsPage from "../pages/subscriptions/SubscriptionsPage";
+import BranchDetailsPage from "@/pages/super-admin/BranchDetailsPage";
 
 export default function AppRoutes() {
   return (
@@ -37,6 +38,8 @@ export default function AppRoutes() {
         <Route path="returns" element={<ReturnsPage />} />
         <Route path="logs" element={<LogsPage />} />
         <Route path="branches" element={<BranchesPage />} />
+        <Route path="branches/:id" element={<BranchDetailsPage />} />
+
         <Route path="subscriptions" element={<SubscriptionsPage />} />
       </Route>
 

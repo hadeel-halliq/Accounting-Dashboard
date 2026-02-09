@@ -18,6 +18,9 @@ export const PermissionProvider = ({ children }) => {
 
   // table + action
   const has = (table, action) => {
+    // 🔥 super admin يشوف كل شي
+    if (user?.role === "SUPER-ADMIN") return true;
+
     const p = permissions.find((x) => x.targettable === table);
     if (!p) return false;
 
