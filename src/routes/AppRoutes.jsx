@@ -20,6 +20,7 @@ import LogsPage from "../pages/logs/LogsPage";
 import BranchesPage from "../pages/super-admin/BranchesPage";
 import SubscriptionsPage from "../pages/subscriptions/SubscriptionsPage";
 import BranchDetailsPage from "@/pages/super-admin/BranchDetailsPage";
+import UserDetailsPage from "@/components/users/UserDetailsPage";
 
 export default function AppRoutes() {
   return (
@@ -29,6 +30,7 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="users/:id" element={<UserDetailsPage/>} />
         <Route path="permissions" element={<PermissionsPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="categories" element={<CategoriesPage />} />
