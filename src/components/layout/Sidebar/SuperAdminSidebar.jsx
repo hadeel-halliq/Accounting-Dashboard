@@ -20,8 +20,8 @@ export default function SuperAdminSidebar() {
         الفروع
       </NavLink>
 
-      <NavLink to="/subscriptions" className={linkClass}>
-        الاشتراكات
+      <NavLink to="/permissions" className={linkClass}>
+       الصلاحيات
       </NavLink>
 
       <NavLink to="/logs" className={linkClass}>

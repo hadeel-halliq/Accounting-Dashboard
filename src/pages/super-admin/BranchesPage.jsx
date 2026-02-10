@@ -9,39 +9,44 @@ import BranchesTable from "@/components/branches/BranchesTable";
 import BranchesCards from "@/components/branches/BranchesCards";
 import BranchFormDialog from "@/components/branches/BranchFormDialog";
 import DeleteBranchDialog from "@/components/branches/DeleteBranchDialog";
+import Pagination from "@/components/common/Pagination";
 
 export default function BranchesPage() {
-  /* ==============================
-     State
-  ============================== */
-
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-
   const [selected, setSelected] = useState(null);
 
+  const LIMIT = 10;
+
   /* ==============================
-     Fetch
+     Fetch (SERVER PAGINATION)
   ============================== */
 
-  const fetchBranches = async () => {
+  const fetchBranches = async (p = 1) => {
     try {
       setLoading(true);
-      const data = await BranchesService.list();
-      setBranches(data || []);
-    } catch (err) {
-      console.error("Failed loading branches", err);
+
+      const data = await BranchesService.list({
+        page: p,
+        limit: LIMIT,
+      });
+
+      setBranches(data.branches);
+      setTotalPages(data.totalPages || 1);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBranches();
-  }, []);
+    fetchBranches(page);
+  }, [page]);
 
   /* ==============================
      Handlers
@@ -70,16 +75,14 @@ export default function BranchesPage() {
     }
 
     setOpenForm(false);
-    fetchBranches();
+    fetchBranches(page);
   };
 
   const handleDelete = async () => {
     await BranchesService.remove(selected.branchid);
 
     setOpenDelete(false);
-    setSelected(null);
-
-    fetchBranches();
+    fetchBranches(page);
   };
 
   /* ==============================
@@ -89,12 +92,8 @@ export default function BranchesPage() {
   return (
     <div dir="rtl" className="space-y-6">
 
-      {/* ================= Header ================= */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-
-        <h1 className="text-2xl font-bold">
-          إدارة الفروع
-        </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">إدارة الفروع</h1>
 
         <Button onClick={openCreate} className="gap-2">
           <Plus size={16} />
@@ -102,24 +101,14 @@ export default function BranchesPage() {
         </Button>
       </div>
 
-      {/* ================= Loading ================= */}
       {loading && (
         <div className="text-center py-16 text-muted-foreground">
-          جاري تحميل الفروع...
+          جاري التحميل...
         </div>
       )}
 
-      {/* ================= Empty ================= */}
-      {!loading && branches.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          لا يوجد فروع حالياً
-        </div>
-      )}
-
-      {/* ================= Content ================= */}
-      {!loading && branches.length > 0 && (
+      {!loading && (
         <>
-          {/* 📱 Mobile → Cards */}
           <div className="md:hidden">
             <BranchesCards
               data={branches}
@@ -128,7 +117,6 @@ export default function BranchesPage() {
             />
           </div>
 
-          {/* 💻 Desktop → Table */}
           <div className="hidden md:block">
             <BranchesTable
               data={branches}
@@ -136,10 +124,14 @@ export default function BranchesPage() {
               onDelete={openDeleteDialog}
             />
           </div>
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onChange={setPage}
+          />
         </>
       )}
-
-      {/* ================= Dialogs ================= */}
 
       <BranchFormDialog
         open={openForm}

@@ -2,7 +2,7 @@ import apiClient from "./http/apiClient";
 import { unwrap } from "./http/apiResponse";
 
 const UsersService = {
-  list: (params) => apiClient.get("/users", { params }).then(unwrap).then((d) => d.users),
+  list: (params) => apiClient.get("/users", { params }).then(unwrap),
 
   get: (id) => apiClient.get(`/users/${id}`).then(unwrap),
 

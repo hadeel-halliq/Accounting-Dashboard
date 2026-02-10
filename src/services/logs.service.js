@@ -6,7 +6,7 @@ const LogsService = {
     apiClient
       .get("/logs", { params })
       .then(unwrap)
-      .then((d) => d.logs),
+      .then((res) => res.data), 
 };
 
 export default LogsService;

@@ -7,7 +7,7 @@ import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/DashboardPage";
 
 import UsersPage from "../pages/users/UsersPage";
-import PermissionsPage from "../pages/users/PermissionsPage";
+import PermissionsPage from "../pages/super-admin/PermissionsPage";
 
 import ProductsPage from "../pages/products/ProductsPage";
 import CategoriesPage from "../pages/products/CategoriesPage";
