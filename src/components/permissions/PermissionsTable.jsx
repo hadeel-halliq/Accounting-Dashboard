@@ -23,7 +23,7 @@ export default function PermissionsTable({
       <table className="w-full text-sm" dir="rtl">
         <thead className="border-b bg-muted/40">
           <tr>
-            <th className="p-3 text-right">الجدول</th>
+            <th className="p-3 text-center">الجدول</th>
             <th className="p-3">عرض</th>
             <th className="p-3">إضافة</th>
             <th className="p-3">تعديل</th>
