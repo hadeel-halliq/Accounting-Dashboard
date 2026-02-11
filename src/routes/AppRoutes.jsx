@@ -18,7 +18,7 @@ import CustomersPage from "../pages/customers/CustomersPage";
 import InvoicesPage from "../pages/invoices/InvoicesPage";
 import PaymentsPage from "../pages/payments/PaymentsPage";
 import ReturnsPage from "../pages/returns/ReturnsPage";
-import LogsPage from "../pages/logs/LogsPage";
+import LogsPage from "../pages/_logs/LogsPage";
 import BranchesPage from "../pages/super-admin/BranchesPage";
 import SubscriptionsPage from "../pages/subscriptions/SubscriptionsPage";
 import BranchDetailsPage from "@/pages/super-admin/BranchDetailsPage";
