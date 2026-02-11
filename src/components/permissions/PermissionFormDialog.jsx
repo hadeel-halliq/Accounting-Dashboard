@@ -29,7 +29,6 @@ const TABLES = [
   "invoices",
   "payments",
   "returns",
-  "subscriptions",
 ];
 
 /* ========================================= */
@@ -91,8 +90,6 @@ export default function PermissionFormDialog({
       setLoading(false);
     }
   };
-
-
 
   /* ================= UI ================= */
 

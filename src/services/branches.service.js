@@ -2,12 +2,6 @@ import apiClient from "./http/apiClient";
 import { unwrap } from "./http/apiResponse";
 
 const BranchesService = {
-  // list: (params) =>
-  //   apiClient
-  //     .get("/branches", { params })
-  //     .then(unwrap)
-  //     .then((d) => d.branches),
-
   list: (params) =>
   apiClient
     .get("/branches", { params })

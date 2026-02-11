@@ -32,16 +32,22 @@ export const PermissionProvider = ({ children }) => {
   //   return p[`can${action}`] === true;
   // };
 
-  
   const has = (table, action = "view") => {
-  if (user?.role === "SUPER-ADMIN") return true;
+    if (user?.role === "SUPER-ADMIN") return true;
 
-  const p = permissions.find((x) => x.targettable === table);
-  if (!p) return false;
+    const p = permissions.find((x) => x.targettable === table);
+    if (!p) return false;
 
-  return p[`can${action.toLowerCase()}`] === true;
-};
+    const map = {
+      view: "print",
+      add: "add",
+      edit: "edit",
+      delete: "delete",
+    };
 
+    const key = map[action.toLowerCase()];
+    return p[`can${key}`] === true;
+  };
 
   return (
     <PermissionContext.Provider value={{ permissions, has }}>
