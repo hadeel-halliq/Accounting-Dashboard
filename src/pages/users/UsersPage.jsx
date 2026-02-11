@@ -28,6 +28,10 @@ export default function UsersPage() {
 
   const LIMIT = 10;
 
+  useEffect(() => {
+    document.title = "إدارة الموظفين - السلام للمحاسبة";
+  }, []);
+
   /* ================= Fetch ================= */
 
   const fetchUsers = async (p = page) => {
@@ -42,7 +46,6 @@ export default function UsersPage() {
       setUsers(res.users || []);
       setTotalPages(res.totalPages || 1);
       setPage(res.page || p);
-
     } finally {
       setLoading(false);
     }
@@ -55,10 +58,7 @@ export default function UsersPage() {
   /* ================= Handlers ================= */
 
   const handleToggle = async (user) => {
-    await UsersService.toggleActive(
-      user.userid,
-      !user.isactive
-    );
+    await UsersService.toggleActive(user.userid, !user.isactive);
     fetchUsers();
   };
 
@@ -83,12 +83,9 @@ export default function UsersPage() {
 
   return (
     <div dir="rtl" className="space-y-6">
-
       {/* Header */}
       <div className="flex justify-between items-center flex-wrap gap-3">
-        <h1 className="text-2xl font-bold">
-          إدارة المستخدمين
-        </h1>
+        <h1 className="text-2xl font-bold">إدارة المستخدمين</h1>
 
         <Button onClick={() => setOpenCreate(true)} className="gap-2">
           <Plus size={16} />
@@ -120,11 +117,7 @@ export default function UsersPage() {
             />
           </div>
 
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onChange={setPage}
-          />
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </>
       )}
 

@@ -176,6 +176,10 @@ export default function LogsPage() {
   /* ================= fetch ================= */
 
   useEffect(() => {
+    document.title = "سجلات الحركة - السلام للمحاسبة";
+  }, []);
+
+  useEffect(() => {
     const fetchLogs = async () => {
       try {
         setLoading(true);

@@ -49,6 +49,10 @@ export default function BranchDetailsPage() {
     fetchBranch();
   }, [id]);
 
+  useEffect(() => {
+    document.title = "تفاصيل الفرع - السلام للمحاسبة";
+  }, []);
+
   /* ==============================
      Actions
   ============================== */
@@ -82,15 +86,12 @@ export default function BranchDetailsPage() {
 
   if (!branch) {
     return (
-      <div className="text-center py-16 text-destructive">
-        الفرع غير موجود
-      </div>
+      <div className="text-center py-16 text-destructive">الفرع غير موجود</div>
     );
   }
 
   return (
     <div dir="rtl" className="space-y-6 max-w-4xl mx-auto">
-
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">تفاصيل الفرع</h1>
@@ -112,10 +113,7 @@ export default function BranchDetailsPage() {
       {/* ================= Plan Card ================= */}
       <Card>
         <CardContent className="space-y-5 p-6">
-
-          <h2 className="font-semibold text-lg">
-            إدارة الاشتراك / الخطة
-          </h2>
+          <h2 className="font-semibold text-lg">إدارة الاشتراك / الخطة</h2>
 
           <Row label="الحالة" value={branch.isactive ? "مفعل" : "غير مفعل"} />
           <Row
@@ -126,13 +124,9 @@ export default function BranchDetailsPage() {
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3 pt-4">
-
-           
-
             <Button variant="secondary" onClick={() => setOpenPlan(true)}>
               تعديل الخطة
             </Button>
-
           </div>
         </CardContent>
       </Card>
@@ -140,13 +134,11 @@ export default function BranchDetailsPage() {
       {/* ================= Dialog ================= */}
       <Dialog open={openPlan} onOpenChange={setOpenPlan}>
         <DialogContent className="sm:max-w-md">
-
           <DialogHeader>
             <DialogTitle>تعديل بيانات الخطة</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-
             <div>
               <Label>تاريخ البداية</Label>
               <Input
@@ -163,7 +155,6 @@ export default function BranchDetailsPage() {
                 onChange={(e) => setPlanNotes(e.target.value)}
               />
             </div>
-
           </div>
 
           <DialogFooter className="gap-2">
@@ -171,14 +162,10 @@ export default function BranchDetailsPage() {
               إلغاء
             </Button>
 
-            <Button onClick={updatePlan}>
-              حفظ
-            </Button>
+            <Button onClick={updatePlan}>حفظ</Button>
           </DialogFooter>
-
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
@@ -195,6 +182,3 @@ function Row({ label, value }) {
     </div>
   );
 }
-
-
-

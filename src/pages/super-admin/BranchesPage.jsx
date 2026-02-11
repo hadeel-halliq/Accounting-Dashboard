@@ -48,6 +48,10 @@ export default function BranchesPage() {
     fetchBranches(page);
   }, [page]);
 
+  useEffect(() => {
+    document.title = "إدارة الأفرع - السلام للمحاسبة";
+  }, []);
+
   /* ==============================
      Handlers
   ============================== */
@@ -91,7 +95,6 @@ export default function BranchesPage() {
 
   return (
     <div dir="rtl" className="space-y-6">
-
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">إدارة الفروع</h1>
 
@@ -125,11 +128,7 @@ export default function BranchesPage() {
             />
           </div>
 
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onChange={setPage}
-          />
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </>
       )}
 

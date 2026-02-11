@@ -1,4 +1,10 @@
+import { useEffect } from "react";
+
 export default function PaymentsPage() {
+  useEffect(() => {
+    document.title = "إدارة الدفعات - السلام للمحاسبة";
+  }, []);
+
   return (
     <div>
       <h1 className="text-xl font-semibold mb-4">Users</h1>

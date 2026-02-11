@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { usePermission } from "@/hooks/usePermission";
-import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 import CategoriesService from "@/services/categories.service";
 
@@ -9,20 +8,21 @@ import CategoriesCards from "@/components/categories/CategoriesCards";
 import CategoryFormDialog from "@/components/categories/CategoryFormDialog";
 
 import { Button } from "@/components/ui/button";
+import Pagination from "@/components/common/Pagination";
 
 const LIMIT = 10;
 
-/* ======================================= */
-
 export default function CategoriesPage() {
-  const { has } = usePermission();
-  const { user } = useAuth();
-
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  const navigate = useNavigate();
 
   /* ================= fetch ================= */
 
@@ -31,96 +31,96 @@ export default function CategoriesPage() {
       setLoading(true);
 
       const res = await CategoriesService.list({
-        page: 1,
+        page,
         limit: LIMIT,
-        branchid: user.branchid, // 🔥 مهم
       });
 
       setCategories(res.categories || []);
+      setTotalPages(res.totalPages || 1);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) fetchCategories();
-  }, [user]);
+    fetchCategories();
+  }, [page]);
 
   /* ================= handlers ================= */
 
-  const handleSubmit = async (values) => {
-    const payload = {
-      ...values,
-      branchid: user.branchid,
-    };
-
-    if (editing) {
-      await CategoriesService.update(editing.categoryid, payload);
-    } else {
-      await CategoriesService.create(payload);
-    }
-
-    setOpenForm(false);
+  const handleCreate = () => {
     setEditing(null);
-    fetchCategories();
+    setOpenForm(true);
+  };
+
+  const handleEdit = (c) => {
+    setEditing(c);
+    setOpenForm(true);
   };
 
   const handleDelete = async (c) => {
+    if (!confirm("متأكد من الحذف؟")) return;
+
     await CategoriesService.remove(c.categoryid);
     fetchCategories();
+  };
+
+  const handleSubmit = async (values) => {
+    if (editing) {
+      await CategoriesService.update(editing.categoryid, values);
+    } else {
+      await CategoriesService.create(values);
+    }
+
+    setOpenForm(false);
+    fetchCategories();
+  };
+
+  /* ⭐️ الانتقال لمنتجات الصنف */
+  const handleViewProducts = (row) => {
+    navigate(
+      `/products?categoryId=${row.categoryid}&categoryName=${row.categoryname}`,
+    );
   };
 
   /* ================= UI ================= */
 
   return (
     <div dir="rtl" className="space-y-6">
-
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">التصنيفات</h1>
-
-        {has("categories", "add") && (
-          <Button onClick={() => setOpenForm(true)}>
-            إضافة تصنيف
-          </Button>
-        )}
+        <Button onClick={handleCreate}>إضافة صنف</Button>
       </div>
 
       {loading && <p className="text-center">جاري التحميل...</p>}
 
       {!loading && (
         <>
-          {/* table */}
           <div className="hidden md:block">
             <CategoriesTable
               data={categories}
-              onEdit={(c) => {
-                setEditing(c);
-                setOpenForm(true);
-              }}
+              onEdit={handleEdit}
               onDelete={handleDelete}
+              onViewProducts={handleViewProducts}
             />
           </div>
 
-          {/* cards */}
           <div className="md:hidden">
             <CategoriesCards
               data={categories}
-              onEdit={(c) => {
-                setEditing(c);
-                setOpenForm(true);
-              }}
+              onEdit={handleEdit}
               onDelete={handleDelete}
+              onViewProducts={handleViewProducts}
             />
           </div>
+
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </>
       )}
 
       <CategoryFormDialog
         open={openForm}
-        onClose={() => {
-          setOpenForm(false);
-          setEditing(null);
-        }}
+        onClose={() => setOpenForm(false)}
         onSubmit={handleSubmit}
         initial={editing}
       />

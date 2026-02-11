@@ -52,7 +52,6 @@
 //   );
 // }
 
-
 import { Routes, Route, Navigate } from "react-router-dom";
 
 /* guards */
@@ -85,7 +84,7 @@ import ReturnsPage from "../pages/returns/ReturnsPage";
 import LogsPage from "../pages/_logs/LogsPage";
 import BranchesPage from "../pages/super-admin/BranchesPage";
 import PermissionsPage from "../pages/super-admin/PermissionsPage";
-import SubscriptionsPage from "../pages/subscriptions/SubscriptionsPage";
+// import SubscriptionsPage from "../pages/subscriptions/SubscriptionsPage";
 import BranchDetailsPage from "@/pages/super-admin/BranchDetailsPage";
 
 /* roles */
@@ -188,14 +187,12 @@ export default function AppRoutes() {
         {/* ========== SUPER ADMIN ONLY ============== */}
         {/* ========================================= */}
 
-        <Route
-          element={<RoleRoute allowedRoles={[roles.SUPER_ADMIN]} />}
-        >
+        <Route element={<RoleRoute allowedRoles={[roles.SUPER_ADMIN]} />}>
           <Route path="logs" element={<LogsPage />} />
           <Route path="branches" element={<BranchesPage />} />
           <Route path="branches/:id" element={<BranchDetailsPage />} />
           <Route path="permissions" element={<PermissionsPage />} />
-          <Route path="subscriptions" element={<SubscriptionsPage />} />
+          {/* <Route path="subscriptions" element={<SubscriptionsPage />} /> */}
         </Route>
       </Route>
 

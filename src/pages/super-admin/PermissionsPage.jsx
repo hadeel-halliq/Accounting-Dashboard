@@ -28,6 +28,10 @@ export default function PermissionsPage() {
   /* ================= users ================= */
 
   useEffect(() => {
+    document.title = "الصلاحيات - السلام للمحاسبة";
+  }, []);
+
+  useEffect(() => {
     const fetchUsers = async () => {
       const data = await UsersService.list({ page: 1, limit: 100 });
       setUsers(data.users || []);

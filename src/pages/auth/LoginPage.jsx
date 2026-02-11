@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
@@ -24,9 +24,7 @@ const schema = z.object({
     .min(1, "البريد الإلكتروني مطلوب")
     .email("صيغة البريد الإلكتروني غير صحيحة"),
 
-  password: z
-    .string()
-    .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
 });
 
 /* =====================================================
@@ -40,8 +38,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [dark, setDark] = useState(
-    document.documentElement.classList.contains("dark")
+    document.documentElement.classList.contains("dark"),
   );
+
+  useEffect(() => {
+    document.title = "تسجيل الدخول - السلام للمحاسبة";
+  }, []);
 
   const {
     register,
@@ -111,10 +113,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label>البريد الإلكتروني</Label>
 
-              <Input
-                placeholder="example@mail.com"
-                {...register("email")}
-              />
+              <Input placeholder="example@mail.com" {...register("email")} />
 
               {errors.email && (
                 <p className="text-destructive text-xs">
@@ -138,11 +137,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 

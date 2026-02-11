@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+
 import {
   Dialog,
   DialogContent,
@@ -17,22 +19,40 @@ export default function CategoryFormDialog({
   onSubmit,
   initial,
 }) {
+  const { user } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     categoryname: "",
     origincountry: "",
   });
 
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
-    if (initial) setForm(initial);
-    else setForm({ categoryname: "", origincountry: "" });
+    if (initial) {
+      setForm(initial);
+    } else {
+      setForm({
+        categoryname: "",
+        origincountry: "",
+      });
+    }
   }, [initial, open]);
 
-  const handleSave = async () => {
+  const handleSubmit = async () => {
+    if (!form.categoryname) {
+      alert("يرجى إدخال الاسم");
+      return;
+    }
+
     try {
       setLoading(true);
-      await onSubmit(form);
+
+      await onSubmit({
+        categoryname: form.categoryname,
+        origincountry: form.origincountry,
+        branchid: user.branchid, // ✅ ديناميكي
+      });
     } finally {
       setLoading(false);
     }
@@ -44,28 +64,28 @@ export default function CategoryFormDialog({
 
         <DialogHeader>
           <DialogTitle>
-            {initial ? "تعديل تصنيف" : "إضافة تصنيف"}
+            {initial ? "تعديل" : "إضافة صنف"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
 
           <div>
-            <Label>اسم التصنيف</Label>
+            <Label>الاسم</Label>
             <Input
               value={form.categoryname}
               onChange={(e) =>
-                setForm({ ...form, categoryname: e.target.value })
+                setForm((p) => ({ ...p, categoryname: e.target.value }))
               }
             />
           </div>
 
           <div>
-            <Label>بلد المنشأ</Label>
+            <Label>الدولة</Label>
             <Input
               value={form.origincountry}
               onChange={(e) =>
-                setForm({ ...form, origincountry: e.target.value })
+                setForm((p) => ({ ...p, origincountry: e.target.value }))
               }
             />
           </div>
@@ -77,7 +97,7 @@ export default function CategoryFormDialog({
             إلغاء
           </Button>
 
-          <Button onClick={handleSave} disabled={loading}>
+          <Button onClick={handleSubmit} disabled={loading}>
             حفظ
           </Button>
         </DialogFooter>
