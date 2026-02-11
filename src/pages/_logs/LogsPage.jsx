@@ -144,8 +144,8 @@ import { useEffect, useState } from "react";
 
 import LogsService from "@/services/logs.service";
 
-import LogsTable from "@/components/logs/LogsTable";
-import LogsCards from "@/components/logs/LogsCards";
+import LogsTable from "@/components/_logs/LogsTable";
+import LogsCards from "@/components/_logs/LogsCards";
 import Pagination from "@/components/common/Pagination";
 
 import {
