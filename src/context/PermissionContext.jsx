@@ -22,15 +22,26 @@ export const PermissionProvider = ({ children }) => {
      has("users", "add")
   ========================================= */
 
-  const has = (table, action) => {
-    // 🔥 super admin يشوف كل شيء
-    if (user?.role === "SUPER-ADMIN") return true;
+  // const has = (table, action) => {
+  //   //  super admin يشوف كل شيء
+  //   if (user?.role === "SUPER-ADMIN") return true;
 
-    const p = permissions.find((x) => x.targettable === table);
-    if (!p) return false;
+  //   const p = permissions.find((x) => x.targettable === table);
+  //   if (!p) return false;
 
-    return p[`can${action}`] === true;
-  };
+  //   return p[`can${action}`] === true;
+  // };
+
+  
+  const has = (table, action = "view") => {
+  if (user?.role === "SUPER-ADMIN") return true;
+
+  const p = permissions.find((x) => x.targettable === table);
+  if (!p) return false;
+
+  return p[`can${action.toLowerCase()}`] === true;
+};
+
 
   return (
     <PermissionContext.Provider value={{ permissions, has }}>
