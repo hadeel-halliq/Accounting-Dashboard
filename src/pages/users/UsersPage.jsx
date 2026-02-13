@@ -73,11 +73,14 @@ export default function UsersPage() {
     fetchUsers();
   };
 
-  const handleCreateSubmit = async (values) => {
-    await AuthService.registerAdmin(values);
-    setOpenCreate(false);
-    fetchUsers();
-  };
+  
+
+const handleCreateSubmit = async (values) => {
+  await AuthService.registerUser(values); 
+  setOpenCreate(false);
+  fetchUsers();
+};
+
 
   /* ================= UI ================= */
 
