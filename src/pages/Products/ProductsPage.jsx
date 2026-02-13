@@ -14,8 +14,8 @@ import { Button } from "@/components/ui/button";
 const LIMIT = 10;
 
 export default function ProductsPage() {
+  
   const [searchParams] = useSearchParams();
-
   const categoryId = searchParams.get("categoryId");
   const categoryName = searchParams.get("categoryName");
 
@@ -89,10 +89,6 @@ export default function ProductsPage() {
   };
 
   const handleSubmit = async (values) => {
-    // const payload = {
-    //   ...values,
-    //   categoryid: categoryId,
-    // };
 
     const payload = {
       ...values,
@@ -147,12 +143,6 @@ export default function ProductsPage() {
         </>
       )}
 
-      {/* <ProductFormDialog
-        open={openForm}
-        onClose={() => setOpenForm(false)}
-        onSubmit={handleSubmit}
-        initial={editing}
-      /> */}
 
       <ProductFormDialog
         open={openForm}
@@ -160,7 +150,7 @@ export default function ProductsPage() {
         onSubmit={handleSubmit}
         initial={editing}
         categoryId={categoryId}
-        categories={categoriesList} // بدك تجيبهم
+        categories={categoriesList} 
       />
     </div>
   );

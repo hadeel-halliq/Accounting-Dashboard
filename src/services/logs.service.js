@@ -15,6 +15,10 @@ const LogsService = {
       _t: Date.now(),
     };
 
+    if (params.operationtype) {
+      cleanParams.operationtype = params.operationtype;
+    }
+
     if (params.targettable) {
       cleanParams.targettable = params.targettable;
     }

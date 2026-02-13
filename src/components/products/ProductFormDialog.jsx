@@ -15,10 +15,7 @@ import { Label } from "@/components/ui/label";
 /* ================================= */
 
 export default function ProductFormDialog({
-  // open,
-  // onClose,
-  // onSubmit,
-  // initial,
+
   open,
   onClose,
   onSubmit,
@@ -27,17 +24,7 @@ export default function ProductFormDialog({
   categories, // list of categories لو ما في categoryId
 }) {
   const [loading, setLoading] = useState(false);
-
-  // const [form, setForm] = useState({
-  //   productname: "",
-  //   barcode: "",
-  //   costprice: "",
-  //   sellprice: "",
-  //   stockquantity: "",
-  //   containerno: "",
-  //   minunit: "PIECE",
-  //   isactive: true,
-  // });
+ ;
 
   const [form, setForm] = useState({
     productname: "",
@@ -60,15 +47,6 @@ export default function ProductFormDialog({
   }, [initial, open]);
 
   const handleChange = (key, value) => setForm((p) => ({ ...p, [key]: value }));
-
-  // const handleSave = async () => {
-  //   try {
-  //     setLoading(true);
-  //     await onSubmit(form);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handleSave = async () => {
     try {
