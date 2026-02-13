@@ -17,8 +17,9 @@ export default function ProductsTable({ data, onEdit, onDelete }) {
           <tr>
             <th className="p-3 text-right">#</th>
             <th className="p-3 text-right">الاسم</th>
-            <th className="p-3 text-right">السعر</th>
+            <th className="p-3 text-right">سعر البيع</th>
             <th className="p-3 text-right">الكمية</th>
+
             <th className="p-3 text-center">الإجراءات</th>
           </tr>
         </thead>
