@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 import CategoriesService from "@/services/categories.service";
 
@@ -21,6 +22,7 @@ export default function CategoriesPage() {
 
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const { user } = useAuth();
 
   const navigate = useNavigate();
 
@@ -58,13 +60,6 @@ export default function CategoriesPage() {
     setOpenForm(true);
   };
 
-  const handleDelete = async (c) => {
-    if (!confirm("متأكد من الحذف؟")) return;
-
-    await CategoriesService.remove(c.categoryid);
-    fetchCategories();
-  };
-
   const handleSubmit = async (values) => {
     if (editing) {
       await CategoriesService.update(editing.categoryid, values);
@@ -100,7 +95,6 @@ export default function CategoriesPage() {
             <CategoriesTable
               data={categories}
               onEdit={handleEdit}
-              onDelete={handleDelete}
               onViewProducts={handleViewProducts}
             />
           </div>
@@ -109,7 +103,6 @@ export default function CategoriesPage() {
             <CategoriesCards
               data={categories}
               onEdit={handleEdit}
-              onDelete={handleDelete}
               onViewProducts={handleViewProducts}
             />
           </div>

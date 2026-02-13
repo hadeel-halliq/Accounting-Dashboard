@@ -6,9 +6,7 @@ export default function ProductsTable({ data, onEdit, onDelete }) {
 
   if (!data.length) {
     return (
-      <p className="text-center py-10 text-muted-foreground">
-        لا يوجد منتجات
-      </p>
+      <p className="text-center py-10 text-muted-foreground">لا يوجد منتجات</p>
     );
   }
 
@@ -29,13 +27,12 @@ export default function ProductsTable({ data, onEdit, onDelete }) {
           {data.map((p) => (
             <tr key={p.productid} className="border-t">
               <td className="p-3">{p.productid}</td>
-              <td className="p-3">{p.name}</td>
-              <td className="p-3">{p.price}</td>
-              <td className="p-3">{p.quantity}</td>
+              <td className="p-3">{p.productname}</td>
+              <td className="p-3">{p.sellprice}</td>
+              <td className="p-3">{p.stockquantity}</td>
 
               <td className="p-3 text-center">
                 <div className="flex gap-2 justify-center">
-
                   {has("products", "edit") && (
                     <Button size="sm" onClick={() => onEdit(p)}>
                       تعديل
@@ -51,7 +48,6 @@ export default function ProductsTable({ data, onEdit, onDelete }) {
                       حذف
                     </Button>
                   )}
-
                 </div>
               </td>
             </tr>
