@@ -367,7 +367,8 @@ export default function UsersPage() {
           <div className="hidden md:block">
             <UsersTable
               data={users}
-              branchesMap={branchesMap} // ⭐ FIX
+              branchesMap={branchesMap}
+              showBranchColumn={currentUser?.role === roles.SUPER_ADMIN}
               onEdit={handleEdit}
               onToggle={handleToggle}
             />
@@ -376,7 +377,8 @@ export default function UsersPage() {
           <div className="md:hidden">
             <UsersCards
               data={users}
-              branchesMap={branchesMap} // ⭐ FIX
+              branchesMap={branchesMap}
+              showBranchColumn={currentUser?.role === roles.SUPER_ADMIN}
               onEdit={handleEdit}
               onToggle={handleToggle}
             />
@@ -401,6 +403,10 @@ export default function UsersPage() {
         open={openCreate}
         onClose={() => setOpenCreate(false)}
         onSubmit={handleCreateSubmit}
+        onSuccess={() => {
+          setOpenCreate(false);
+          fetchUsers(1);
+        }}
       />
     </div>
   );

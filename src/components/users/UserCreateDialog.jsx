@@ -169,7 +169,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { roles } from "@/constan/roles";
-import BranchesService from "@/services/branches.service"; // ⭐ MODIFIED
+import AuthService from "@/services/auth.service";
+import BranchesService from "@/services/branches.service";
 
 import {
   Dialog,
@@ -184,7 +185,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-export default function UserCreateDialog({ open, onClose, onSubmit }) {
+export default function UserCreateDialog({ open, onClose, onSubmit, onSuccess }) {
   const { user: currentUser } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -222,36 +223,40 @@ export default function UserCreateDialog({ open, onClose, onSubmit }) {
     setLoading(true);
 
     try {
-      const payload = {
+      const data = {
         fullname: form.fullname,
         email: form.email,
         password: form.password,
       };
 
-      /* ======================================================
-         ⭐ SUPER ADMIN → ينشئ ADMIN فقط
-      ====================================================== */
-      if (currentUser.role === roles.SUPER_ADMIN) {
-        payload.role = roles.ADMIN;
-
-        if (!form.branchid)
-          throw new Error("يجب اختيار الفرع");
-
-        payload.branchid = Number(form.branchid);
-      }
-
-      /* ======================================================
-         ⭐ ADMIN → ينشئ USER فقط بنفس فرعه
-      ====================================================== */
       if (currentUser.role === roles.ADMIN) {
-        payload.role = roles.USER;
-        payload.branchid = Number(currentUser.branchid);
+        // ADMIN: enforce role & branch — do not trust form values
+        const payload = {
+          ...data,
+          role: "USER",
+          branchid: currentUser.branchid,
+        };
+        console.log("🚀 Admin creating Employee via AuthService...", payload);
+        await AuthService.registerUser(payload);
+        onSuccess?.();
+        handleClose();
+        return;
       }
+
+      /* ======================================================
+         SUPER-ADMIN → create branch admin via parent handler
+      ====================================================== */
+      const payload = {
+        ...data,
+        role: roles.ADMIN,
+      };
+      if (!form.branchid) throw new Error("يجب اختيار الفرع");
+      payload.branchid = Number(form.branchid);
 
       await onSubmit(payload);
       handleClose();
     } catch (err) {
-      alert(err.message);
+      alert(err.message || "فشل في إضافة المستخدم");
     } finally {
       setLoading(false);
     }

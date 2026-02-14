@@ -43,6 +43,7 @@ import { roles } from "@/constan/roles";
 export default function UsersCards({
   data = [],
   branchesMap = {},
+  showBranchColumn = false,
   onEdit,
   onToggle,
 }) {
@@ -102,17 +103,15 @@ export default function UsersCards({
               </Badge>
             </div>
 
-            {/* ⭐ الفرع (اسم + رقم) */}
-            <div className="flex justify-between items-center">
-              <span className="text-sm">الفرع:</span>
-
-              <div className="text-sm font-medium text-right">
-                {getBranchName(user.branchid)}
-                <div className="text-xs text-muted-foreground">
-                  #{user.branchid || "-"}
-                </div>
+            {/* الفرع — فقط لسوبر أدمن */}
+            {showBranchColumn && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm">الفرع:</span>
+                <span className="text-sm font-medium text-right">
+                  {getBranchName(user.branchid)}
+                </span>
               </div>
-            </div>
+            )}
 
             {/* الحالة */}
             <div className="flex justify-between items-center">
