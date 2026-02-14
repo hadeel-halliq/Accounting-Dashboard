@@ -1,12 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { usePermission } from "@/hooks/usePermission";
 
+const UNIT_LABELS = {
+  PIECE: "قطعة",
+  DOZEN: "دزينة",
+  BOX: "صندوق",
+};
+
 export default function ProductsTable({ data, onEdit, onDelete }) {
   const { has } = usePermission();
 
   if (!data.length) {
     return (
-      <p className="text-center py-10 text-muted-foreground">لا يوجد منتجات</p>
+      <p className="text-center py-10 text-muted-foreground">
+        لا يوجد منتجات
+      </p>
     );
   }
 
@@ -17,9 +25,9 @@ export default function ProductsTable({ data, onEdit, onDelete }) {
           <tr>
             <th className="p-3 text-right">#</th>
             <th className="p-3 text-right">الاسم</th>
+            <th className="p-3 text-right">الوحدة</th>
             <th className="p-3 text-right">سعر البيع</th>
             <th className="p-3 text-right">الكمية</th>
-
             <th className="p-3 text-center">الإجراءات</th>
           </tr>
         </thead>
@@ -29,6 +37,9 @@ export default function ProductsTable({ data, onEdit, onDelete }) {
             <tr key={p.productid} className="border-t">
               <td className="p-3">{p.productid}</td>
               <td className="p-3">{p.productname}</td>
+              <td className="p-3">
+                {UNIT_LABELS[p.minunit] || "-"}
+              </td>
               <td className="p-3">{p.sellprice}</td>
               <td className="p-3">{p.stockquantity}</td>
 

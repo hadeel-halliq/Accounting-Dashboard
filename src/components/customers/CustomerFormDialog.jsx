@@ -68,17 +68,23 @@ export default function CustomerFormDialog({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await onSubmit(form);
+
+    await onSubmit({
+      firstname: form.firstname,
+      lastname: form.lastname,
+      phone: form.phone,
+      address: form.address || null,
+      companyname: form.companyname || null,
+      type: form.type,
+      isactive: form.isactive,
+    });
   };
 
   /* ================= UI ================= */
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent
-        dir="rtl"
-        className="sm:max-w-xl w-full"
-      >
+      <DialogContent dir="rtl" className="sm:max-w-xl w-full">
         <DialogHeader>
           <DialogTitle className="text-right font-bold">
             {isEdit ? "تعديل العميل" : "إضافة عميل جديد"}
@@ -87,9 +93,9 @@ export default function CustomerFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* ===== responsive grid ===== */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+            {/* الاسم الأول */}
             <div>
               <Label>الاسم الأول</Label>
               <Input
@@ -101,6 +107,7 @@ export default function CustomerFormDialog({
               />
             </div>
 
+            {/* اسم العائلة */}
             <div>
               <Label>اسم العائلة</Label>
               <Input
@@ -112,6 +119,7 @@ export default function CustomerFormDialog({
               />
             </div>
 
+            {/* الهاتف */}
             <div>
               <Label>رقم الهاتف</Label>
               <Input
@@ -123,6 +131,7 @@ export default function CustomerFormDialog({
               />
             </div>
 
+            {/* الشركة */}
             <div>
               <Label>اسم الشركة</Label>
               <Input
@@ -133,6 +142,7 @@ export default function CustomerFormDialog({
               />
             </div>
 
+            {/* العنوان */}
             <div className="md:col-span-2">
               <Label>العنوان</Label>
               <Input
@@ -143,6 +153,7 @@ export default function CustomerFormDialog({
               />
             </div>
 
+            {/* ✅ النوع (تم التعديل هنا فقط) */}
             <div>
               <Label>النوع</Label>
               <select
@@ -154,9 +165,11 @@ export default function CustomerFormDialog({
               >
                 <option value="CUSTOMER">عميل</option>
                 <option value="SUPPLIER">مورد</option>
+                <option value="IMPORTER">مستورد</option> {/* ✅ الجديد */}
               </select>
             </div>
 
+            {/* نشط */}
             <div className="flex items-center gap-2 pt-6">
               <input
                 type="checkbox"
@@ -170,7 +183,7 @@ export default function CustomerFormDialog({
 
           </div>
 
-          {/* ===== buttons ===== */}
+          {/* buttons */}
           <div className="flex flex-col md:flex-row gap-3 justify-end pt-4">
 
             <Button

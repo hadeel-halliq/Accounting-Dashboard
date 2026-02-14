@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { usePermission } from "@/hooks/usePermission";
 
+const UNIT_LABELS = {
+  PIECE: "قطعة",
+  DOZEN: "دزينة",
+  BOX: "صندوق",
+};
+
 export default function ProductsCards({ data, onEdit, onDelete }) {
   const { has } = usePermission();
 
@@ -12,6 +18,10 @@ export default function ProductsCards({ data, onEdit, onDelete }) {
           className="border rounded-xl p-4 bg-card space-y-3"
         >
           <div className="font-bold">{p.productname}</div>
+
+          <div className="text-sm text-muted-foreground">
+            الوحدة: {UNIT_LABELS[p.minunit] || "-"}
+          </div>
 
           <div className="text-sm text-muted-foreground">
             سعر البيع: {p.sellprice}
