@@ -13,7 +13,7 @@ export default function DashboardHeader({ className }) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between flex-wrap gap-3",
+        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between flex-wrap ",
         className
       )}
     >
