@@ -1,7 +1,7 @@
 export const roles = {
   SUPER_ADMIN: "SUPER-ADMIN",
   ADMIN: "ADMIN",
-  EMPLOYEE: "EMPLOYEE",
+  USER: "USER", 
 };
 
 export const adminLinks = [

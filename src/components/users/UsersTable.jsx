@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-export default function UsersTable({ data = [], onEdit, onToggle, onReset }) {
+export default function UsersTable({ data = [], onEdit, onToggle }) {
   const navigate = useNavigate();
 
   return (
-    <div className="rounded-xl border bg-card overflow-x-auto">
+    <div className="rounded-xl border bg-card overflow-x-auto shadow-sm">
       <table className="w-full text-sm" dir="rtl">
         <thead className="border-b bg-muted/40">
           <tr>
+            <th className="p-3 text-right w-[100px]">ID الفرع</th>
             <th className="p-3 text-right">الاسم</th>
             <th className="p-3 text-right">البريد</th>
             <th className="p-3 text-right">الحالة</th>
@@ -18,28 +19,27 @@ export default function UsersTable({ data = [], onEdit, onToggle, onReset }) {
 
         <tbody>
           {data.map((u) => (
-            <tr key={u.userid} className="border-b hover:bg-muted/40">
-              <td className="p-3">{u.fullname}</td>
-              <td className="p-3">{u.email}</td>
-              <td className="p-3">{u.isactive ? "مفعل" : "غير مفعل"}</td>
+            <tr key={u.userid} className="border-b hover:bg-muted/40 transition-colors">
+              {/* عرض رقم الفرع بخط مميز */}
+              <td className="p-3 font-mono text-blue-600 font-bold">
+                {u.branchid ? `#${u.branchid}` : "—"}
+              </td>
+              <td className="p-3 font-medium">{u.fullname}</td>
+              <td className="p-3 text-muted-foreground">{u.email}</td>
+              <td className="p-3">
+                <span className={`px-2 py-1 rounded-full text-[10px] ${u.isactive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {u.isactive ? "مفعل" : "غير مفعل"}
+                </span>
+              </td>
 
               <td className="p-3">
-                <div className="flex justify-end gap-2 flex-wrap">
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/users/${u.userid}`)}
-                  >
+                <div className="flex justify-center gap-2 flex-wrap">
+                  <Button size="sm" variant="secondary" onClick={() => navigate(`/users/${u.userid}`)}>
                     عرض
                   </Button>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onToggle(u)}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => onToggle(u)}>
                     {u.isactive ? "تعطيل" : "تفعيل"}
                   </Button>
-
                   <Button size="sm" onClick={() => onEdit(u)}>
                     تعديل
                   </Button>

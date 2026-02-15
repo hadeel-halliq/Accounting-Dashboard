@@ -55,8 +55,9 @@
 //   }
 
 //   return (
-//     <div className="rounded-xl border border-border bg-card p-2">
-//       <div className="overflow-x-auto">
+//     <div className="rounded-xl border border-border bg-card p-2 md:p-4">
+//       {/* Desktop: table */}
+//       <div className="hidden md:block overflow-x-auto">
 //         <table className="w-full text-sm" dir="rtl">
 //           <thead className="border-b border-border bg-muted/40">
 //             <tr>
@@ -141,6 +142,80 @@
 //           </tbody>
 //         </table>
 //       </div>
+
+//       {/* Mobile: card view */}
+//       <div className="md:hidden space-y-4">
+//         {paginated.map((inv) => {
+//           const statusInfo = STATUS_MAP[inv.status] || STATUS_MAP.DRAFT;
+//           const dateStr = inv.date
+//             ? format(new Date(inv.date), "yyyy-MM-dd", { locale: ar })
+//             : "—";
+//           const grandTotal = inv.total ?? inv.grandtotal ?? inv.nettotal ?? "—";
+//           const paymentTypeLabel =
+//             PAYMENT_TYPE_LABELS[inv.paymenttype] ?? inv.paymenttype ?? "—";
+//           return (
+//             <div
+//               key={inv.invoiceid}
+//               className="border border-border rounded-lg p-3 bg-white dark:bg-slate-900"
+//             >
+//               <div className="space-y-2 text-sm">
+//                 <div className="flex justify-between">
+//                   <span className="text-muted-foreground">العميل</span>
+//                   <span className="font-medium text-foreground">
+//                     {customerNames[inv.customerid] ?? inv.customerid ?? "—"}
+//                   </span>
+//                 </div>
+//                 <div className="flex justify-between">
+//                   <span className="text-muted-foreground">التاريخ</span>
+//                   <span className="text-foreground">{dateStr}</span>
+//                 </div>
+//                 <div className="flex justify-between">
+//                   <span className="text-muted-foreground">نوع الدفع</span>
+//                   <span className="text-foreground">{paymentTypeLabel}</span>
+//                 </div>
+//                 <div className="flex justify-between">
+//                   <span className="text-muted-foreground">الإجمالي</span>
+//                   <span className="text-foreground">{grandTotal}</span>
+//                 </div>
+//               </div>
+//               <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center justify-between gap-2">
+//                 {onStatusChange ? (
+//                   <Select
+//                     value={inv.status ?? "DRAFT"}
+//                     onValueChange={(value) => onStatusChange(inv, value)}
+//                   >
+//                     <SelectTrigger className="w-[130px] h-8 border border-input">
+//                       <SelectValue />
+//                     </SelectTrigger>
+//                     <SelectContent>
+//                       {INVOICE_STATUS_OPTIONS.map((o) => (
+//                         <SelectItem key={o.value} value={o.value}>
+//                           {o.label}
+//                         </SelectItem>
+//                       ))}
+//                     </SelectContent>
+//                   </Select>
+//                 ) : (
+//                   <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+//                 )}
+//                 <div className="flex gap-2">
+//                   {onEdit && (
+//                     <Button size="sm" variant="outline" onClick={() => onEdit(inv)}>
+//                       تعديل
+//                     </Button>
+//                   )}
+//                   {onDelete && (
+//                     <Button size="sm" variant="destructive" onClick={() => onDelete(inv)}>
+//                       حذف
+//                     </Button>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+//           );
+//         })}
+//       </div>
+
 //       <Pagination
 //         page={page}
 //         totalPages={totalPages}

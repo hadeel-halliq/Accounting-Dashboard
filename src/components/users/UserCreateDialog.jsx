@@ -1,5 +1,8 @@
-// import { useState, useEffect } from "react";
+// import { useState } from "react";
+// import { useAuth } from "@/hooks/useAuth";
+// import { roles } from "@/constan/roles";
 
+// // استيراد مكونات UI (تأكد من مساراتها في مشروعك)
 // import {
 //   Dialog,
 //   DialogContent,
@@ -7,194 +10,166 @@
 //   DialogTitle,
 //   DialogFooter,
 // } from "@/components/ui/dialog";
-
 // import { Input } from "@/components/ui/input";
 // import { Label } from "@/components/ui/label";
 // import { Button } from "@/components/ui/button";
+// import { Loader2 } from "lucide-react";
 
-// import BranchesService from "@/services/branches.service";
-// import { useAuth } from "@/hooks/useAuth";
-
-// /*
-// ==================================================
-// ✅ LOGIC
-// --------------------------------------------------
-// ADMIN → ينشئ USER فقط
-// SUPER ADMIN → ينشئ ADMIN + يختار الفرع
-// ==================================================
-// */
-
-// export default function UserCreateDialog({
-//   open,
-//   onClose,
-//   onSubmit,
-// }) {
-
-//   const { user, loading: authLoading } = useAuth();
-
-//   const [branches, setBranches] = useState([]);
-
+// export default function UserCreateDialog({ open, onClose, onSubmit }) {
+//   const { user: currentUser } = useAuth();
+  
+//   const [loading, setLoading] = useState(false);
 //   const [form, setForm] = useState({
 //     fullname: "",
 //     email: "",
 //     password: "",
-//     role: "USER",
-//     branchid: "",
+//     branchid: "", // يستخدم فقط من قبل السوبر أدمن
 //   });
 
-//   const [loading, setLoading] = useState(false);
-
-//   /* ================= LOAD BRANCHES ================= */
-
-//   useEffect(() => {
-
-//     if (authLoading) return;
-
-//     if (user?.role === "SUPER-ADMIN") {
-//       BranchesService.list({ page: 1, limit: 100 })
-//         .then((res) => {
-//           console.log("BRANCHES:", res);
-//           setBranches(res.branches || []);
-//         })
-//         .catch(() => setBranches([]));
-//     }
-
-//   }, [user, authLoading]);
-
-//   /* ================= HANDLERS ================= */
-
-//   const handleChange = (key, value) => {
-//     setForm((p) => ({ ...p, [key]: value }));
+//   // تنظيف النموذج عند الإغلاق
+//   const handleClose = () => {
+//     setForm({ fullname: "", email: "", password: "", branchid: "" });
+//     onClose();
 //   };
 
-//   const handleSubmit = async () => {
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
 
+//     // التحقق من الحقول الأساسية
 //     if (!form.fullname || !form.email || !form.password) {
-//       alert("يرجى تعبئة جميع الحقول");
+//       alert("يرجى تعبئة كافة الحقول الأساسية");
 //       return;
 //     }
 
-//     try {
-//       setLoading(true);
+//     setLoading(true);
 
-//       await onSubmit({
+//     try {
+//       // تجهيز البيانات الأساسية
+//       const payload = {
 //         fullname: form.fullname,
 //         email: form.email,
 //         password: form.password,
-//         role: user?.role === "SUPER-ADMIN" ? form.role : "USER",
-//         branchid: form.branchid || undefined,
-//       });
+//       };
 
-//       setForm({
-//         fullname: "",
-//         email: "",
-//         password: "",
-//         role: "USER",
-//         branchid: "",
-//       });
+//       /* منطق توزيع الأدوار (السر هنا) */
+//       if (currentUser?.role === roles.SUPER_ADMIN) {
+//         // السوبر أدمن يضيف "مدير فرع" حصراً
+//         payload.role = roles.ADMIN;
+//         payload.branchid = Number(form.branchid);
 
-//       onClose();
+//         if (!payload.branchid) {
+//           throw new Error("يجب تحديد رقم الفرع للمدير الجديد");
+//         }
+//       } 
+//       else if (currentUser?.role === roles.ADMIN) {
+//         // الأدمن يضيف "موظف" حصراً ويتم ربطه بفرع الأدمن تلقائياً
+//         payload.role = roles.USER; 
+//         payload.branchid = Number(currentUser.branchid);
+//       }
 
+//       // إرسال البيانات للأب (UsersPage)
+//       await onSubmit(payload);
+//       handleClose(); // إغلاق وتهيئة النموذج بعد النجاح
+//     } catch (err) {
+//       alert(err.message || "فشل في إضافة المستخدم");
 //     } finally {
 //       setLoading(false);
 //     }
 //   };
 
-//   /* ================= UI ================= */
-
 //   return (
-//     <Dialog open={open} onOpenChange={onClose}>
-//       <DialogContent dir="rtl" className="sm:max-w-md">
-
+//     <Dialog open={open} onOpenChange={handleClose}>
+//       <DialogContent className="sm:max-w-[425px]" dir="rtl">
 //         <DialogHeader>
-//           <DialogTitle>إضافة مستخدم</DialogTitle>
+//           <DialogTitle className="text-right">
+//             {currentUser?.role === roles.SUPER_ADMIN 
+//               ? "إضافة مدير فرع جديد (Admin)" 
+//               : "إضافة موظف جديد لفرعك (User)"}
+//           </DialogTitle>
 //         </DialogHeader>
 
-//         <div className="space-y-4">
-
-//           <div>
-//             <Label>الاسم الكامل</Label>
-//             <Input
-//               value={form.fullname}
-//               onChange={(e) => handleChange("fullname", e.target.value)}
-//             />
-//           </div>
-
-//           <div>
-//             <Label>البريد الإلكتروني</Label>
-//             <Input
-//               type="email"
-//               value={form.email}
-//               onChange={(e) => handleChange("email", e.target.value)}
-//             />
-//           </div>
-
-//           <div>
-//             <Label>كلمة المرور</Label>
-//             <Input
-//               type="password"
-//               value={form.password}
-//               onChange={(e) => handleChange("password", e.target.value)}
-//             />
-//           </div>
-
-//           {/* ✅ SUPER ADMIN ONLY */}
-//           {!authLoading && user?.role === "SUPER-ADMIN" && (
-//             <>
-//               <div>
-//                 <Label>نوع المستخدم</Label>
-//                 <select
-//                   className="w-full border rounded-md p-2"
-//                   value={form.role}
-//                   onChange={(e) => handleChange("role", e.target.value)}
-//                 >
-//                   <option value="USER">موظف</option>
-//                   <option value="ADMIN">أدمن</option>
-//                 </select>
-//               </div>
-
-//               {form.role === "ADMIN" && (
-//                 <div>
-//                   <Label>الفرع</Label>
-//                   <select
-//                     className="w-full border rounded-md p-2"
-//                     value={form.branchid}
-//                     onChange={(e) =>
-//                       handleChange("branchid", e.target.value)
-//                     }
-//                   >
-//                     <option value="">اختر الفرع</option>
-
-//                     {branches.map((b) => (
-//                       <option key={b.branchid} value={b.branchid}>
-//                         {b.branchname}
-//                       </option>
-//                     ))}
-//                   </select>
-//                 </div>
-//               )}
-//             </>
+//         <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          
+//           {/* حقل رقم الفرع: يظهر فقط للسوبر أدمن */}
+//           {currentUser?.role === roles.SUPER_ADMIN && (
+//             <div className="space-y-2">
+//               <Label htmlFor="branchid">رقم الفرع المستهدف</Label>
+//               <Input
+//                 id="branchid"
+//                 type="number"
+//                 placeholder="مثلاً: 101"
+//                 value={form.branchid}
+//                 onChange={(e) => setForm({ ...form, branchid: e.target.value })}
+//                 required
+//               />
+//             </div>
 //           )}
 
-//         </div>
+//           <div className="space-y-2">
+//             <Label htmlFor="fullname">الاسم الكامل</Label>
+//             <Input
+//               id="fullname"
+//               placeholder="أدخل اسم الموظف"
+//               value={form.fullname}
+//               onChange={(e) => setForm({ ...form, fullname: e.target.value })}
+//               required
+//             />
+//           </div>
 
-//         <DialogFooter className="mt-6">
-//           <Button variant="outline" onClick={onClose}>
-//             إلغاء
-//           </Button>
+//           <div className="space-y-2">
+//             <Label htmlFor="email">البريد الإلكتروني</Label>
+//             <Input
+//               id="email"
+//               type="email"
+//               placeholder="example@mail.com"
+//               value={form.email}
+//               onChange={(e) => setForm({ ...form, email: e.target.value })}
+//               required
+//             />
+//           </div>
 
-//           <Button disabled={loading} onClick={handleSubmit}>
-//             {loading ? "جارٍ الإنشاء..." : "إنشاء"}
-//           </Button>
-//         </DialogFooter>
+//           <div className="space-y-2">
+//             <Label htmlFor="password">كلمة المرور</Label>
+//             <Input
+//               id="password"
+//               type="password"
+//               placeholder="••••••••"
+//               value={form.password}
+//               onChange={(e) => setForm({ ...form, password: e.target.value })}
+//               required
+//             />
+//           </div>
 
+//           <DialogFooter className="flex gap-2 pt-4">
+//             <Button 
+//               type="submit" 
+//               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+//               disabled={loading}
+//             >
+//               {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+//               حفظ البيانات
+//             </Button>
+//             <Button 
+//               type="button" 
+//               variant="outline" 
+//               onClick={handleClose}
+//               className="flex-1"
+//             >
+//               إلغاء
+//             </Button>
+//           </DialogFooter>
+//         </form>
 //       </DialogContent>
 //     </Dialog>
 //   );
 // }
 
 
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { roles } from "@/constan/roles";
+import BranchesService from "@/services/branches.service"; // ⭐ MODIFIED
 
 import {
   Dialog,
@@ -207,71 +182,123 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
-const ROLES = { SUPER_ADMIN: "SUPER-ADMIN", ADMIN: "ADMIN" };
-
-export default function UserCreateDialog({
-  open,
-  onClose,
-  onSubmit,
-}) {
+export default function UserCreateDialog({ open, onClose, onSubmit }) {
   const { user: currentUser } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+
+  const [branches, setBranches] = useState([]); // ⭐ MODIFIED
+
   const [form, setForm] = useState({
     fullname: "",
     email: "",
     password: "",
+    branchid: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  /* ======================================================
+     ⭐ جلب الأفرع فقط إذا كان SUPER ADMIN
+  ====================================================== */
+  useEffect(() => {
+    if (!open) return;
 
-  const handleChange = (key, value) => {
-    setForm((p) => ({ ...p, [key]: value }));
+    if (currentUser?.role === roles.SUPER_ADMIN) {
+      BranchesService.list({ page: 1, limit: 100 })
+        .then((res) => setBranches(res.branches || []))
+        .catch(() => setBranches([]));
+    }
+  }, [open, currentUser]);
+
+  const handleClose = () => {
+    setForm({ fullname: "", email: "", password: "", branchid: "" });
+    onClose();
   };
 
-  const handleSubmit = async () => {
-    if (!form.fullname || !form.email || !form.password) {
-      alert("يرجى تعبئة جميع الحقول");
-      return;
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const payload = { ...form };
-    if (currentUser?.role === ROLES.ADMIN && currentUser?.branchid != null) {
-      payload.branchid = Number(currentUser.branchid);
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
+      const payload = {
+        fullname: form.fullname,
+        email: form.email,
+        password: form.password,
+      };
+
+      /* ======================================================
+         ⭐ SUPER ADMIN → ينشئ ADMIN فقط
+      ====================================================== */
+      if (currentUser.role === roles.SUPER_ADMIN) {
+        payload.role = roles.ADMIN;
+
+        if (!form.branchid)
+          throw new Error("يجب اختيار الفرع");
+
+        payload.branchid = Number(form.branchid);
+      }
+
+      /* ======================================================
+         ⭐ ADMIN → ينشئ USER فقط بنفس فرعه
+      ====================================================== */
+      if (currentUser.role === roles.ADMIN) {
+        payload.role = roles.USER;
+        payload.branchid = Number(currentUser.branchid);
+      }
+
       await onSubmit(payload);
-
-      setForm({
-        fullname: "",
-        email: "",
-        password: "",
-      });
-
-      onClose();
+      handleClose();
+    } catch (err) {
+      alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent dir="rtl" className="sm:max-w-md">
-
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent dir="rtl">
         <DialogHeader>
-          <DialogTitle>إضافة مستخدم (Admin)</DialogTitle>
+          <DialogTitle>
+            {currentUser?.role === roles.SUPER_ADMIN
+              ? "إضافة مدير فرع"
+              : "إضافة موظف"}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* ⭐ اختيار الفرع فقط للسوبر أدمن */}
+          {currentUser?.role === roles.SUPER_ADMIN && (
+            <div>
+              <Label>الفرع</Label>
+
+              <select
+                className="w-full border rounded-md p-2"
+                value={form.branchid}
+                onChange={(e) =>
+                  setForm({ ...form, branchid: e.target.value })
+                }
+              >
+                <option value="">اختر الفرع</option>
+
+                {branches.map((b) => (
+                  <option key={b.branchid} value={b.branchid}>
+                    {b.branchname}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <Label>الاسم الكامل</Label>
             <Input
               value={form.fullname}
               onChange={(e) =>
-                handleChange("fullname", e.target.value)
+                setForm({ ...form, fullname: e.target.value })
               }
             />
           </div>
@@ -282,7 +309,7 @@ export default function UserCreateDialog({
               type="email"
               value={form.email}
               onChange={(e) =>
-                handleChange("email", e.target.value)
+                setForm({ ...form, email: e.target.value })
               }
             />
           </div>
@@ -293,24 +320,18 @@ export default function UserCreateDialog({
               type="password"
               value={form.password}
               onChange={(e) =>
-                handleChange("password", e.target.value)
+                setForm({ ...form, password: e.target.value })
               }
             />
           </div>
 
-        </div>
-
-        <DialogFooter className="mt-6 flex justify-end gap-2">
-
-          <Button variant="outline" onClick={onClose}>
-            إلغاء
-          </Button>
-
-          <Button disabled={loading} onClick={handleSubmit}>
-            {loading ? "جارٍ الإنشاء..." : "إنشاء"}
-          </Button>
-
-        </DialogFooter>
+          <DialogFooter>
+            <Button disabled={loading}>
+              {loading && <Loader2 className="animate-spin ml-2" />}
+              حفظ
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

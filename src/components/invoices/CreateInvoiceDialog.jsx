@@ -16,9 +16,14 @@ import InvoiceForm, {
   mapProductsToOptions,
 } from "./InvoiceForm";
 
-function mapInvoiceToDefaultValues(inv) {
+function mapInvoiceToDefaultValues(inv, products = []) {
   if (!inv) return null;
   const items = Array.isArray(inv.items) ? inv.items : [];
+  const productList = Array.isArray(products) ? products : [];
+  const getMinunit = (productid) => {
+    const p = productList.find((p) => String(p.productid ?? p.id ?? "") === String(productid));
+    return p?.minunit ?? "PIECE";
+  };
   return {
     customerid: inv.customerid != null ? String(inv.customerid) : "",
     paymentmethod: inv.paymentmethod ?? "CASH",
@@ -32,12 +37,13 @@ function mapInvoiceToDefaultValues(inv) {
         ? items.map((row) => ({
             productid: row.productid != null ? String(row.productid) : "",
             selectedunit: row.selectedunit ?? "PIECE",
+            minunit: row.minunit ?? getMinunit(row.productid),
             quantity: Number(row.quantity) || 1,
             dozensinbox: row.selectedunit === "BOX" ? (Number(row.dozensinbox) || undefined) : undefined,
             unitprice: Number(row.unitprice) || 0,
             itemdiscount: Number(row.itemdiscount) || 0,
           }))
-        : [{ productid: "", selectedunit: "PIECE", quantity: 1, dozensinbox: undefined, unitprice: 0, itemdiscount: 0 }],
+        : [{ productid: "", selectedunit: "PIECE", minunit: "PIECE", quantity: 1, dozensinbox: undefined, unitprice: 0, itemdiscount: 0 }],
   };
 }
 
@@ -81,7 +87,7 @@ export default function CreateInvoiceDialog({
         setProductOptions(mapProductsToOptions(prodList));
 
         if (editingInvoiceId && rest[0]) {
-          setFormDefaultValues(mapInvoiceToDefaultValues(rest[0]));
+          setFormDefaultValues(mapInvoiceToDefaultValues(rest[0], prodList));
         } else if (!editingInvoiceId) {
           setFormDefaultValues(null);
         }

@@ -9,7 +9,6 @@
 // import InvoicesTable from "@/components/invoices/InvoicesTable";
 // import CreateInvoiceDialog from "@/components/invoices/CreateInvoiceDialog";
 // import DeleteInvoiceDialog from "@/components/invoices/DeleteInvoiceDialog";
-// import InvoicesCards from "@/components/invoices/InvoicesCards";
 // import { getCustomerLabel } from "@/components/invoices/InvoiceForm";
 // import Pagination from "@/components/common/Pagination";
 
@@ -135,27 +134,13 @@
 
 //       {!loading && (
 //         <>
-//           {/* Desktop Table */}
-//           <div className="hidden md:block">
-//             <InvoicesTable
-//               data={data}
-//               onEdit={openEdit}
-//               onDelete={openDeleteDialog}
-//               onStatusChange={handleStatusChange}
-//               customerNames={customerNames}
-//             />
-//           </div>
-
-//           {/* Mobile Cards */}
-//           <div className="md:hidden">
-//             <InvoicesCards
-//               data={data}
-//               onEdit={openEdit}
-//               onDelete={openDeleteDialog}
-//               onStatusChange={handleStatusChange}
-//               customerNames={customerNames}
-//             />
-//           </div>
+//           <InvoicesTable
+//             data={data}
+//             onEdit={openEdit}
+//             onDelete={openDeleteDialog}
+//             onStatusChange={handleStatusChange}
+//             customerNames={customerNames}
+//           />
 
 //           {totalPages > 1 && (
 //             <Pagination
