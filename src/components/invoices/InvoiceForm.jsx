@@ -1245,10 +1245,14 @@
 
 
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import toast from "react-hot-toast";
+
+import InvoicesService from "@/services/invoices.service";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1460,6 +1464,19 @@ function normalizeUnit(v) {
   return UNIT_MAP[s] ?? "PIECE";
 }
 
+/** Normalize any date value to YYYY-MM-DD for input[type="date"]. */
+function normalizeDateToYYYYMMDD(val) {
+  if (val == null || val === "") return new Date().toISOString().slice(0, 10);
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed.slice(0, 10);
+    const d = new Date(trimmed);
+    return Number.isNaN(d.getTime()) ? new Date().toISOString().slice(0, 10) : d.toISOString().slice(0, 10);
+  }
+  const d = new Date(val);
+  return Number.isNaN(d.getTime()) ? new Date().toISOString().slice(0, 10) : d.toISOString().slice(0, 10);
+}
+
 /** Map UI unit to API enum. Only maps the actual selected value – never infer BOX from dozensinbox. */
 function mapUnitToEnum(v) {
   return normalizeUnit(v);
@@ -1485,6 +1502,7 @@ export function mapCustomersToOptions(customers) {
     .map((c) => ({
       label: getCustomerLabel(c),
       value: String(c.customerid ?? c.id ?? ""),
+      type: c.type ?? "CUSTOMER", // Include customer type for filtering
     }))
     .filter((o) => o.value !== "");
 }
@@ -1501,6 +1519,70 @@ export function mapProductsToOptions(products) {
     .filter((o) => o.value !== "");
 }
 
+/**
+ * Map API invoice response to form default values (edit mode).
+ * Handles both flat (customerid, discount) and nested (customer.id, discountvalue) backend shapes.
+ * Items support: productid, selectedunit/unit, unitprice/price, quantity, itemdiscount, dozensinbox.
+ * CRITICAL: Backend returns 'invoiceitems', not 'items'
+ */
+function mapInvoiceToDefaultValues(inv, productOptions = []) {
+  if (!inv) return null;
+  const raw = inv?.invoice ?? inv;
+  // FIX: Check for invoiceitems first, then fallback to items
+  const items = raw.invoiceitems || raw.items || [];
+  if (!Array.isArray(items)) return null;
+  const getMinunit = (productid) => {
+    const opt = productOptions.find((o) => o.value === String(productid));
+    return opt?.minunit ?? "PIECE";
+  };
+
+  const customerid =
+    raw.customerid != null
+      ? String(raw.customerid)
+      : raw.customer?.id != null
+        ? String(raw.customer.id)
+        : raw.customer?.customerid != null
+          ? String(raw.customer.customerid)
+          : "";
+
+  const paymentType = raw.paymenttype === "CREDIT" ? "DEFERRED" : (raw.paymenttype ?? "CASH");
+  const discount = Number(raw.discount ?? raw.discountvalue ?? 0) || 0;
+  const date = normalizeDateToYYYYMMDD(raw.date ?? raw.invoicedate);
+
+  const mappedItems =
+    items.length > 0
+      ? items.map((row) => {
+          const productid = row.productid ?? row.product?.id ?? row.product?.productid ?? "";
+          const selectedunit = normalizeUnit(row.selectedunit ?? row.unit ?? "PIECE");
+          const unitprice = Number(row.unitprice ?? row.price ?? 0) || 0;
+          const quantity = Number(row.quantity ?? row.qty ?? 1) || 1;
+          const itemdiscount = Number(row.itemdiscount ?? row.discount ?? 0) || 0;
+          const dozensinbox =
+            selectedunit === "BOX" ? (Number(row.dozensinbox) || undefined) : undefined;
+          return {
+            productid: productid !== "" ? String(productid) : "",
+            selectedunit,
+            minunit: row.minunit ?? getMinunit(productid),
+            quantity,
+            dozensinbox,
+            unitprice,
+            itemdiscount,
+          };
+        })
+      : [{ ...defaultItem }];
+
+  return {
+    customerid,
+    paymentmethod: raw.paymentmethod ?? "CASH",
+    paymenttype: paymentType,
+    currency: raw.currency ?? "USD",
+    status: raw.status ?? "DRAFT",
+    date,
+    discount,
+    items: mappedItems,
+  };
+}
+
 /* ========== InvoiceForm ========== */
 
 export default function InvoiceForm({
@@ -1510,7 +1592,14 @@ export default function InvoiceForm({
   onSubmit,
   onCancel,
   submitLabel = "إنشاء الفاتورة",
+  invoiceId: invoiceIdProp,
 }) {
+  const { id: routeId } = useParams();
+  const editId = invoiceIdProp ?? routeId ?? null;
+
+  const [invoiceType, setInvoiceType] = useState("EXPORT");
+  const [loading, setLoading] = useState(() => Boolean(editId));
+
   const {
     register,
     control,
@@ -1533,10 +1622,161 @@ export default function InvoiceForm({
       },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "items",
   });
+
+  /**
+   * EDIT MODE INITIALIZATION
+   * When component mounts with an id, fetch invoice and precisely map to form state.
+   * Handles: Type toggle, Header fields, Items Grid, and Financials.
+   */
+  useEffect(() => {
+    if (!editId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchInvoice = async () => {
+      try {
+        setLoading(true);
+        const response = await InvoicesService.get(editId);
+        
+        if (cancelled) return;
+
+        // Handle response structure (response.data or response.invoice or response)
+        const invoice = response?.data ?? response?.invoice ?? response ?? {};
+        
+        if (!invoice || typeof invoice !== "object") {
+          throw new Error("Invalid invoice data structure");
+        }
+
+        console.log("✅ Fetched Invoice:", invoice);
+
+        // ========== A. HEADER MAPPING ==========
+        
+        // 1. Set Type (Triggers Import/Export toggle color)
+        const invoiceTypeValue = invoice.type === "IMPORT" ? "IMPORT" : "EXPORT";
+        setInvoiceType(invoiceTypeValue);
+        console.log("📦 Invoice Type:", invoiceTypeValue);
+
+        // 2. Customer ID (handle nested customer object)
+        const customerid =
+          invoice.customerid != null
+            ? String(invoice.customerid)
+            : invoice.customer?.id != null
+              ? String(invoice.customer.id)
+              : invoice.customer?.customerid != null
+                ? String(invoice.customer.customerid)
+                : "";
+
+        // 3. Payment Type (API sends CREDIT, form expects DEFERRED)
+        const paymenttype = invoice.paymenttype === "CREDIT" ? "DEFERRED" : (invoice.paymenttype ?? "CASH");
+
+        // 4. Format Date (CRITICAL: HTML Input needs YYYY-MM-DD)
+        const dateStr = normalizeDateToYYYYMMDD(invoice.invoicedate ?? invoice.date);
+
+        // 5. Discount (handle both discountvalue and discount)
+        const discountValue = Number(invoice.discountvalue ?? invoice.discount ?? 0) || 0;
+
+        // Set all header fields
+        setValue("customerid", customerid);
+        setValue("paymentmethod", invoice.paymentmethod ?? "CASH");
+        setValue("paymenttype", paymenttype);
+        setValue("currency", invoice.currency ?? "USD");
+        setValue("status", invoice.status ?? "DRAFT");
+        setValue("date", dateStr);
+        setValue("discount", discountValue);
+
+        console.log("📋 Header Mapped:", {
+          customerid,
+          paymentmethod: invoice.paymentmethod,
+          paymenttype,
+          currency: invoice.currency,
+          date: dateStr,
+          discount: discountValue,
+        });
+
+        // ========== B. ITEMS GRID MAPPING (The Complex Part) ==========
+        
+        // FIX: Backend returns 'invoiceitems', not 'items'
+        // Check for invoiceitems OR items to be safe
+        const rawItems = invoice.invoiceitems || invoice.items || [];
+        
+        console.log("🔍 Raw Items from API:", rawItems);
+        
+        if (Array.isArray(rawItems) && rawItems.length > 0) {
+          const getMinunit = (productid) => {
+            const opt = productOptions.find((o) => o.value === String(productid));
+            return opt?.minunit ?? "PIECE";
+          };
+
+          // Transform backend items to frontend grid structure
+          const mappedItems = rawItems.map((item, index) => {
+            const productid = item.productid ?? item.product?.id ?? item.product?.productid ?? "";
+            
+            // Backend sends 'selectedunit' or 'unit', Frontend expects normalized unit
+            const unit = normalizeUnit(item.unit ?? item.selectedunit ?? "PIECE");
+            
+            // Handle both 'price' and 'unitprice' from backend
+            const price = Number(item.price ?? item.unitprice ?? 0) || 0;
+            const quantity = Number(item.quantity ?? item.qty ?? 1) || 1;
+            const itemdiscount = Number(item.itemdiscount ?? item.discount ?? 0) || 0;
+            const dozensinbox = unit === "BOX" ? (Number(item.dozensinbox ?? 0) || undefined) : undefined;
+            
+            // Calculate total for verification
+            const total = quantity * price;
+            
+            const mappedItem = {
+              productid: productid !== "" ? String(productid) : "",
+              selectedunit: unit,
+              minunit: item.minunit ?? getMinunit(productid),
+              quantity,
+              dozensinbox,
+              unitprice: price,
+              itemdiscount,
+            };
+
+            console.log(`📦 Item ${index + 1}:`, {
+              productid: mappedItem.productid,
+              productName: item.product?.name ?? item.product?.productname ?? "منتج غير معروف",
+              unit: mappedItem.selectedunit,
+              quantity: mappedItem.quantity,
+              price: mappedItem.unitprice,
+              total: total,
+            });
+
+            return mappedItem;
+          });
+
+          replace(mappedItems);
+          console.log(`✅ Mapped Items for Grid:`, mappedItems);
+          console.log(`✅ Replaced ${mappedItems.length} items in grid`);
+        } else {
+          console.warn("⚠️ No items found in invoice (checked both invoiceitems and items)");
+        }
+
+      } catch (error) {
+        if (!cancelled) {
+          console.error("❌ Failed to load invoice:", error);
+          toast.error("فشل تحميل بيانات الفاتورة");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchInvoice();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [editId, setValue, replace]);
 
   const items = watch("items") ?? [];
   const discount = Number(watch("discount")) || 0;
@@ -1593,10 +1833,38 @@ export default function InvoiceForm({
     });
   }, [items, productOptions]);
 
+  /**
+   * Clear selected customer when switching invoice type if the customer
+   * is not valid for the new type (e.g. switching from EXPORT to IMPORT
+   * but selected customer is CUSTOMER type, not IMPORTER).
+   */
+  useEffect(() => {
+    const currentCustomerId = watch("customerid");
+    if (!currentCustomerId) return;
+
+    const filteredIds = customerOptions
+      .filter((c) => {
+        if (invoiceType === "EXPORT") {
+          return c.type === "CUSTOMER" || c.type === "SUPPLIER";
+        }
+        if (invoiceType === "IMPORT") {
+          return c.type === "IMPORTER";
+        }
+        return true;
+      })
+      .map((c) => c.value);
+
+    // If current selection is not in filtered list, clear it
+    if (!filteredIds.includes(String(currentCustomerId))) {
+      setValue("customerid", "");
+      console.log("🔄 Cleared customer selection due to invoice type change");
+    }
+  }, [invoiceType, customerOptions, setValue, watch]);
+
   const onFormSubmit = (values) => {
     const data = values;
-    // Minimal schema: root and items match backend exactly. No dozensinbox, no notes.
     const payload = {
+      type: invoiceType,
       customerid: Number(data.customerid),
       paymenttype: normalizePaymentType(data.paymenttype),
       currency: data.currency || "USD",
@@ -1608,9 +1876,10 @@ export default function InvoiceForm({
         itemdiscount: Number(item.itemdiscount || 0),
       })),
     };
-    console.log("🚀 Final Minimal Payload:", JSON.stringify(payload, null, 2));
-    return Promise.resolve(onSubmit(payload));
+    return Promise.resolve(onSubmit(payload, editId));
   };
+
+  const effectiveSubmitLabel = submitLabel ?? (editId ? "حفظ التعديلات" : "إنشاء الفاتورة");
 
   const inputClass = "text-left border border-input rounded-md px-3 py-2 h-9 min-w-0";
 
@@ -1653,25 +1922,89 @@ export default function InvoiceForm({
     );
   };
 
+  const isImport = invoiceType === "IMPORT";
+  const customerLabel = isImport ? "المورد" : "العميل";
+  const customerPlaceholder = isImport ? "اختر المورد" : "اختر العميل";
+
+  /**
+   * DYNAMIC FILTERING: Filter customers based on invoice type
+   * - EXPORT (Sale): Show CUSTOMER or SUPPLIER types
+   * - IMPORT (Purchase): Show IMPORTER type only
+   */
+  const filteredCustomerOptions = customerOptions.filter((c) => {
+    if (invoiceType === "EXPORT") {
+      // For sales/exports: show customers and suppliers
+      return c.type === "CUSTOMER" || c.type === "SUPPLIER";
+    }
+    if (invoiceType === "IMPORT") {
+      // For purchases/imports: show importers only
+      return c.type === "IMPORTER";
+    }
+    // Fallback: show all if type is unknown
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12 text-muted-foreground">
+        جاري تحميل الفاتورة...
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6 text-right">
-      {/* ========== Header: Customer, Payment, Currency, Status, Date ========== */}
-      <section className="rounded-lg border border-border bg-muted/20 p-3 md:p-4 space-y-4">
+      {/* ========== Invoice Mode Switcher (EXPORT / IMPORT) ========== */}
+      <div className="flex gap-3 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setInvoiceType("EXPORT")}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors border-2 ${
+            invoiceType === "EXPORT"
+              ? "bg-blue-600 border-blue-600 text-white hover:bg-blue-700"
+              : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
+          }`}
+        >
+          <span aria-hidden>📤</span>
+          فاتورة مبيع (تصدير)
+        </button>
+        <button
+          type="button"
+          onClick={() => setInvoiceType("IMPORT")}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors border-2 ${
+            invoiceType === "IMPORT"
+              ? "bg-orange-500 border-orange-500 text-white hover:bg-orange-600"
+              : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
+          }`}
+        >
+          <span aria-hidden>📥</span>
+          فاتورة شراء (استيراد)
+        </button>
+      </div>
+
+      {/* ========== Header: Customer/Supplier, Payment, Currency, Status, Date ========== */}
+      <section
+        className={`rounded-lg border-2 bg-muted/20 p-3 md:p-4 space-y-4 ${
+          invoiceType === "EXPORT"
+            ? "border-blue-500/50"
+            : "border-orange-500/50"
+        }`}
+      >
         <h3 className="text-sm font-semibold text-foreground border-b border-border pb-2">
           بيانات الفاتورة
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label>العميل</Label>
+            <Label>{customerLabel}</Label>
             <Select
               value={String(watch("customerid") ?? "")}
               onValueChange={(v) => setValue("customerid", v)}
             >
               <SelectTrigger className="w-full border border-input rounded-md px-3 py-2 h-9">
-                <SelectValue placeholder="اختر العميل" />
+                <SelectValue placeholder={customerPlaceholder} />
               </SelectTrigger>
               <SelectContent>
-                {customerOptions.map((opt) => (
+                {filteredCustomerOptions.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </SelectItem>
@@ -2071,7 +2404,7 @@ export default function InvoiceForm({
           disabled={isSubmitting || netTotal <= 0}
           className="w-full sm:w-auto"
         >
-          {isSubmitting ? "جارٍ الحفظ..." : submitLabel}
+          {isSubmitting ? "جارٍ الحفظ..." : effectiveSubmitLabel}
         </Button>
       </div>
     </form>

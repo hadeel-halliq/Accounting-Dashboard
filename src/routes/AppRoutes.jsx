@@ -23,6 +23,7 @@ import CategoriesPage from "../pages/products/CategoriesPage";
 
 import CustomersPage from "../pages/customers/CustomersPage";
 import InvoicesPage from "../pages/invoices/InvoicesPage";
+import InvoiceFormPage from "../pages/invoices/InvoiceFormPage";
 import PaymentsPage from "../pages/payments/PaymentsPage";
 import ReturnsPage from "../pages/returns/ReturnsPage";
 
@@ -107,6 +108,14 @@ export default function AppRoutes() {
           element={
             <PermissionGuard table="invoices">
               <InvoicesPage />
+            </PermissionGuard>
+          }
+        />
+        <Route
+          path="invoices/edit/:id"
+          element={
+            <PermissionGuard table="invoices">
+              <InvoiceFormPage />
             </PermissionGuard>
           }
         />

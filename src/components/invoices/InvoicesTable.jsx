@@ -301,9 +301,19 @@ export default function InvoicesTable({
           <tbody>
             {paginated.map((inv) => {
               const statusInfo = STATUS_MAP[inv.status] || STATUS_MAP.DRAFT;
-              const dateStr = inv.date
-                ? format(new Date(inv.date), "yyyy-MM-dd", { locale: ar })
+              
+              // Format date with time (DD/MM/YYYY HH:MM AM/PM)
+              const dateStr = (inv.invoicedate || inv.date || inv.created_at)
+                ? new Date(inv.invoicedate || inv.date || inv.created_at).toLocaleString('en-GB', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })
                 : "—";
+              
               const grandTotal = inv.total ?? inv.grandtotal ?? inv.nettotal ?? "—";
               const paymentTypeLabel =
                 PAYMENT_TYPE_LABELS[inv.paymenttype] ?? inv.paymenttype ?? "—";
@@ -375,9 +385,19 @@ export default function InvoicesTable({
       <div className="md:hidden space-y-4">
         {paginated.map((inv) => {
           const statusInfo = STATUS_MAP[inv.status] || STATUS_MAP.DRAFT;
-          const dateStr = inv.date
-            ? format(new Date(inv.date), "yyyy-MM-dd", { locale: ar })
+          
+          // Format date with time (DD/MM/YYYY HH:MM AM/PM)
+          const dateStr = (inv.invoicedate || inv.date || inv.created_at)
+            ? new Date(inv.invoicedate || inv.date || inv.created_at).toLocaleString('en-GB', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })
             : "—";
+          
           const grandTotal = inv.total ?? inv.grandtotal ?? inv.nettotal ?? "—";
           const paymentTypeLabel =
             PAYMENT_TYPE_LABELS[inv.paymenttype] ?? inv.paymenttype ?? "—";

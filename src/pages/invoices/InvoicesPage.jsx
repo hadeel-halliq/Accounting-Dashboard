@@ -174,6 +174,7 @@
 
 import { useEffect, useState } from "react";
 
+import toast from "react-hot-toast";
 import InvoicesService from "@/services/invoices.service";
 import CustomersService from "@/services/customers.service";
 
@@ -258,14 +259,20 @@ export default function InvoicesPage() {
   };
 
   const handleSubmit = async (payload, invoiceId) => {
-    if (invoiceId != null) {
-      await InvoicesService.update(invoiceId, payload);
-    } else {
-      await InvoicesService.create(payload);
+    try {
+      if (invoiceId != null) {
+        await InvoicesService.update(invoiceId, payload);
+        toast.success("تم تحديث الفاتورة بنجاح");
+      } else {
+        await InvoicesService.create(payload);
+        toast.success("تم إنشاء الفاتورة بنجاح");
+      }
+      setOpenForm(false);
+      setEditingInvoiceId(null);
+      fetchInvoices(page);
+    } catch (err) {
+      toast.error(err?.response?.data?.message ?? err?.message ?? "فشل في حفظ الفاتورة");
     }
-    setOpenForm(false);
-    setEditingInvoiceId(null);
-    fetchInvoices(page);
   };
 
   const handleStatusChange = async (inv, newStatus) => {
