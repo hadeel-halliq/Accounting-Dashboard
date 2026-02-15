@@ -24,6 +24,11 @@ export default function BranchSidebar() {
           المستخدمون
         </NavLink>
       )}
+      
+      {/* permissions: visible for both SUPER-ADMIN and ADMIN */}
+      <NavLink to="/permissions" className={linkClass}>
+        الصلاحيات
+      </NavLink>
 
       {/* products */}
       {has("products", "view") && (

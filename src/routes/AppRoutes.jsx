@@ -128,6 +128,12 @@ export default function AppRoutes() {
             </PermissionGuard>
           }
         />
+        {/* ========================================= */}
+        {/* Permissions: SUPER-ADMIN and ADMIN */}
+        {/* ========================================= */}
+        <Route element={<RoleRoute allowedRoles={[roles.SUPER_ADMIN, roles.ADMIN]} />}>
+          <Route path="permissions" element={<PermissionsPage />} />
+        </Route>
 
         {/* ========================================= */}
         {/* ========== SUPER ADMIN ONLY ============== */}
@@ -137,7 +143,6 @@ export default function AppRoutes() {
           <Route path="logs" element={<LogsPage />} />
           <Route path="branches" element={<BranchesPage />} />
           <Route path="branches/:id" element={<BranchDetailsPage />} />
-          <Route path="permissions" element={<PermissionsPage />} />
           {/* <Route path="subscriptions" element={<SubscriptionsPage />} /> */}
         </Route>
       </Route>
