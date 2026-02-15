@@ -71,6 +71,24 @@ export default function CategoriesPage() {
     fetchCategories();
   };
 
+  const handleDelete = async (row) => {
+    if (!confirm("متأكد من حذف هذا الصنف؟")) return;
+    try {
+      await CategoriesService.delete(row.categoryid);
+      setCategories((prev) =>
+        prev.filter((c) => c.categoryid !== row.categoryid)
+      );
+    } catch (err) {
+      const msg =
+        err?.message || err?.response?.data?.message || "فشل في حذف الصنف";
+      alert(
+        msg.includes("product") || msg.includes("منتج")
+          ? "لا يمكن الحذف: الصنف مرتبط بمنتجات."
+          : msg
+      );
+    }
+  };
+
   /* ⭐️ الانتقال لمنتجات الصنف */
   const handleViewProducts = (row) => {
     navigate(
@@ -95,6 +113,7 @@ export default function CategoriesPage() {
             <CategoriesTable
               data={categories}
               onEdit={handleEdit}
+              onDelete={handleDelete}
               onViewProducts={handleViewProducts}
             />
           </div>
@@ -103,6 +122,7 @@ export default function CategoriesPage() {
             <CategoriesCards
               data={categories}
               onEdit={handleEdit}
+              onDelete={handleDelete}
               onViewProducts={handleViewProducts}
             />
           </div>

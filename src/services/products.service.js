@@ -7,4 +7,5 @@ export default {
   get: (id) => apiClient.get(`/products/${id}`).then(unwrap),
   update: (id, data) => apiClient.put(`/products/${id}`, data).then(unwrap),
   remove: (id) => apiClient.delete(`/products/${id}`).then(unwrap),
+  delete: (id) => apiClient.delete(`/products/${id}`).then(unwrap),
 };

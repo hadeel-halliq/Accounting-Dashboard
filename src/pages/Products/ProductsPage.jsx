@@ -10,6 +10,7 @@ import ProductFormDialog from "@/components/products/ProductFormDialog";
 import Pagination from "@/components/common/Pagination";
 
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 const LIMIT = 10;
 
@@ -27,7 +28,8 @@ export default function ProductsPage() {
 
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [categoriesList, setCategoriesList] = useState([]);
+  const [categories, setCategories] = useState([]);
+
   /* ================= fetch ================= */
 
   const fetchProducts = async (p = page) => {
@@ -58,16 +60,10 @@ export default function ProductsPage() {
   }, [page, categoryId]);
 
   useEffect(() => {
-    if (!categoryId) {
-      CategoriesService.list({ page: 1, limit: 1000 })
-        .then((res) => {
-          setCategoriesList(res.categories || []);
-        })
-        .catch((err) => {
-          console.log("Failed to load categories", err);
-        });
-    }
-  }, [categoryId]);
+    CategoriesService.getAll()
+      .then((res) => setCategories(res?.categories ?? []))
+      .catch((err) => console.log("Failed to load categories", err));
+  }, []);
 
   /* ================= handlers ================= */
 
@@ -82,10 +78,14 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (row) => {
-    if (!confirm("متأكد من الحذف؟")) return;
-
-    await ProductsService.remove(row.productid);
-    fetchProducts();
+    if (!window.confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    try {
+      await ProductsService.delete(row.productid);
+      setData((prev) => prev.filter((p) => p.productid !== row.productid));
+      toast.success("تم الحذف بنجاح");
+    } catch (err) {
+      toast.error(err?.message || "فشل في حذف المنتج");
+    }
   };
 
   const handleSubmit = async (values) => {
@@ -117,6 +117,7 @@ export default function ProductsPage() {
         </h1>
 
         <Button onClick={handleCreate}>إضافة منتج</Button>
+        
       </div>
 
       {loading && <p className="text-center py-10">جاري التحميل...</p>}
@@ -134,10 +135,12 @@ export default function ProductsPage() {
           <div className="hidden md:block">
             <ProductsTable
               data={data}
+              categories={categories}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
           </div>
+          
 
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </>
@@ -150,7 +153,7 @@ export default function ProductsPage() {
         onSubmit={handleSubmit}
         initial={editing}
         categoryId={categoryId}
-        categories={categoriesList} 
+        categories={categories} 
       />
     </div>
   );

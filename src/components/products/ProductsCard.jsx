@@ -45,12 +45,14 @@ export default function ProductsCards({ data, onEdit, onDelete }) {
             {has("products", "delete") && (
               <Button
                 size="sm"
-                variant="destructive"
+                variant="ghost"
+                className="text-red-500 hover:text-red-700 font-medium px-2 py-1 transition-colors"
                 onClick={() => onDelete(p)}
               >
                 حذف
               </Button>
             )}
+            
           </div>
         </div>
       ))}

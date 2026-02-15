@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import CategoriesService from "@/services/categories.service";
+
 import {
   Dialog,
   DialogContent,
@@ -28,9 +30,25 @@ export default function ProductFormDialog({
   onSubmit,
   initial,
   categoryId,
-  categories,
+  categories: _categoriesProp,
 }) {
   const [loading, setLoading] = useState(false);
+  const [categoriesList, setCategoriesList] = useState([]);
+
+  /* ================= Fetch categories when dialog opens ================= */
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await CategoriesService.getAll();
+        const data = response?.categories ?? response?.data ?? response;
+        setCategoriesList(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+        setCategoriesList([]);
+      }
+    };
+    if (open) fetchCategories();
+  }, [open]);
 
   const emptyForm = {
     productname: "",
@@ -100,6 +118,7 @@ export default function ProductFormDialog({
             <div>
               <Label>الصنف</Label>
               <select
+                name="categoryid"
                 className="w-full border rounded-md p-2"
                 value={form.categoryid}
                 onChange={(e) =>
@@ -108,9 +127,12 @@ export default function ProductFormDialog({
               >
                 <option value="">اختر الصنف</option>
 
-                {categories?.map((c) => (
-                  <option key={c.categoryid} value={c.categoryid}>
-                    {c.categoryname}
+                {categoriesList.map((cat) => (
+                  <option
+                    key={cat.categoryid ?? cat.id}
+                    value={cat.categoryid ?? cat.id}
+                  >
+                    {cat.categoryname ?? cat.name}
                   </option>
                 ))}
               </select>

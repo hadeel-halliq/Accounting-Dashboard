@@ -1355,6 +1355,7 @@ export const CURRENCY_OPTIONS = [
 
 export const INVOICE_STATUS_OPTIONS = [
   { value: "DRAFT", label: "مسودة" },
+  { value: "PENDING", label: "معلقة" },
   { value: "SHIPPED", label: "تم الشحن" },
   { value: "PROCESSING", label: "قيد المعالجة" },
   { value: "CONFIRMED", label: "مؤكد" },

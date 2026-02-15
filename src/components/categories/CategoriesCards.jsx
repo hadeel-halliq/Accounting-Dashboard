@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 
-export default function CategoriesCards({ data, onEdit, onViewProducts }) {
+export default function CategoriesCards({
+  data,
+  onEdit,
+  onDelete,
+  onViewProducts,
+}) {
   return (
     <div className="grid gap-4">
       {data.map((c) => (
@@ -16,8 +21,17 @@ export default function CategoriesCards({ data, onEdit, onViewProducts }) {
               المنتجات
             </Button>
 
-            <Button size="sm" onClick={() => onEdit(c)}>
+            <Button size="sm" variant="outline" onClick={() => onEdit(c)}>
               تعديل
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              onClick={() => onDelete(c)}
+            >
+              حذف
             </Button>
           </div>
         </div>
